@@ -1,0 +1,21 @@
+{
+  "name": "Bloc Noté",
+  "short_name": "Bloc Noté",
+  "description": "Dossiers, sous-dossiers et plusieurs notes par dossier.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070b18",
+  "theme_color": "#0b1022",
+  "lang": "fr-FR",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}
