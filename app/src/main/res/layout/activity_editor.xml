@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <Button android:id="@+id/editorBack" android:layout_width="56dp" android:layout_height="48dp" android:text="←" />
+        <TextView android:id="@+id/saveState" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="Sauvegardé" android:textSize="13sp" android:alpha="0.72" />
+        <Button android:id="@+id/editorMenu" android:layout_width="56dp" android:layout_height="48dp" android:text="⋮" android:textSize="24sp" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/noteTitle"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:background="@android:color/transparent"
+        android:hint="Titre"
+        android:maxLines="1"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/noteTags"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Tags : travail, idée, musique…"
+        android:singleLine="true"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textSize="14sp" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:scrollbars="none">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <Button android:id="@+id/toolBullet" android:layout_width="wrap_content" android:layout_height="46dp" android:text="• Liste" />
+            <Button android:id="@+id/toolCheck" android:layout_width="wrap_content" android:layout_height="46dp" android:text="☐ Tâche" />
+            <Button android:id="@+id/toolDate" android:layout_width="wrap_content" android:layout_height="46dp" android:text="Date" />
+            <Button android:id="@+id/toolVoice" android:layout_width="wrap_content" android:layout_height="46dp" android:text="🎙 Dictée" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <EditText
+        android:id="@+id/noteBody"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:gravity="top|start"
+        android:hint="Écrivez ici…"
+        android:inputType="textCapSentences|textMultiLine"
+        android:padding="10dp"
+        android:scrollbars="vertical"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/editorStats"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:gravity="center_vertical|end"
+        android:paddingRight="8dp"
+        android:text="0 mot • 0 caractère"
+        android:textSize="12sp"
+        android:alpha="0.68" />
+</LinearLayout>
