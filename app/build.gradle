@@ -14,6 +14,7 @@ android {
         versionName '2.0.0'
     }
 
+    // Signature de debug stable utilisee par les builds GitHub Actions V2 et suivants.
     signingConfigs {
         stableDebug {
             storeFile file(System.getProperty('user.home') + '/.android/debug.keystore')
