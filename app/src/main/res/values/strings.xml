@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bloc Note Ultra</string>
+    <string name="search_hint">Rechercher dans les notes…</string>
+    <string name="new_note">Nouvelle note</string>
+    <string name="new_folder">Nouveau dossier</string>
+</resources>
