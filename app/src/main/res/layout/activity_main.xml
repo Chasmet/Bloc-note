@@ -18,18 +18,24 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="Bloc Note Ultra"
                 android:textSize="25sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/breadcrumb"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="Accueil"
                 android:textSize="13sp"
                 android:alpha="0.68" />
@@ -37,13 +43,20 @@
 
         <Button
             android:id="@+id/btnFolder"
-            android:layout_width="wrap_content"
+            android:layout_width="112dp"
             android:layout_height="48dp"
-            android:text="+ Dossier" />
+            android:layout_marginLeft="6dp"
+            android:minWidth="0dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:text="+ DOSSIER"
+            android:textSize="13sp" />
+
         <Button
             android:id="@+id/btnMenu"
             android:layout_width="52dp"
             android:layout_height="48dp"
+            android:minWidth="0dp"
             android:text="⋮"
             android:textSize="24sp" />
     </LinearLayout>
@@ -58,22 +71,53 @@
         android:iconifiedByDefault="false"
         android:queryHint="Rechercher dans les notes…" />
 
-    <HorizontalScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
-            <Button android:id="@+id/filterNotes" android:layout_width="wrap_content" android:layout_height="46dp" android:text="Notes" />
-            <Button android:id="@+id/filterFav" android:layout_width="wrap_content" android:layout_height="46dp" android:text="★ Favoris" />
-            <Button android:id="@+id/filterArchive" android:layout_width="wrap_content" android:layout_height="46dp" android:text="Archive" />
-            <Button android:id="@+id/filterTrash" android:layout_width="wrap_content" android:layout_height="46dp" android:text="Corbeille" />
-        </LinearLayout>
-    </HorizontalScrollView>
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <Button
+            android:id="@+id/filterNotes"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="NOTES"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/filterFav"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="★ FAVORIS"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/filterArchive"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="ARCHIVE"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/filterTrash"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="CORBEILLE"
+            android:textSize="10sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/stats"
@@ -86,15 +130,21 @@
         android:textSize="13sp"
         android:alpha="0.70" />
 
-    <ListView
+    <GridView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:dividerHeight="1dp"
+        android:clipToPadding="false"
+        android:horizontalSpacing="8dp"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="1"
         android:paddingLeft="8dp"
+        android:paddingTop="4dp"
         android:paddingRight="8dp"
-        android:clipToPadding="false" />
+        android:paddingBottom="8dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="8dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -102,19 +152,23 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="8dp">
+
         <Button
             android:id="@+id/btnBackFolder"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="← Retour" />
+            android:minWidth="0dp"
+            android:text="← RETOUR" />
+
         <Button
             android:id="@+id/btnNew"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
             android:layout_marginLeft="8dp"
-            android:text="＋ Nouvelle note"
+            android:layout_weight="2"
+            android:minWidth="0dp"
+            android:text="＋ NOUVELLE NOTE"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
