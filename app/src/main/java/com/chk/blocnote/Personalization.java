@@ -12,7 +12,6 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public final class Personalization {
     public interface ColorCallback { void onColor(String hex); }
@@ -65,11 +64,15 @@ public final class Personalization {
         if (value == null) return DEFAULT_COLOR;
         String x = value.trim().toUpperCase();
         if (!x.startsWith("#")) x = "#" + x;
-        try {
-            Color.parseColor(x);
-            if (x.length() == 7) return x;
-        } catch (Exception ignored) { }
-        return DEFAULT_COLOR;
+        if (!x.matches("#[0-9A-F]{6}")) return DEFAULT_COLOR;
+        return x;
+    }
+
+    public static boolean isValidHex(String value) {
+        if (value == null) return false;
+        String x = value.trim().toUpperCase();
+        if (!x.startsWith("#")) x = "#" + x;
+        return x.matches("#[0-9A-F]{6}");
     }
 
     public static int blend(int base, int overlay, float ratio) {
@@ -104,19 +107,6 @@ public final class Personalization {
     }
 
     public static void showColorPicker(final Activity activity, String current, final ColorCallback callback) {
-        final AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle("Choisir une couleur")
-                .setView(buildColorGrid(activity, current, callback))
-                .setNegativeButton("Annuler", null)
-                .create();
-        View grid = dialog.getListView();
-        dialog.setOnShowListener(d -> { });
-        // La grille ferme elle-même la fenêtre via son tag.
-        dialog.show();
-        GridView gv = dialog.findViewById(android.R.id.custom) instanceof GridView ? (GridView) dialog.findViewById(android.R.id.custom) : null;
-    }
-
-    private static GridView buildColorGrid(final Activity activity, String current, final ColorCallback callback) {
         final GridView grid = new GridView(activity);
         grid.setNumColumns(4);
         grid.setHorizontalSpacing(dp(activity, 8));
@@ -135,7 +125,7 @@ public final class Personalization {
                 t.setMinHeight(dp(activity, 64));
                 if (position < COLORS.length) {
                     int color = parseColor(COLORS[position]);
-                    int fill = Color.argb(40, Color.red(color), Color.green(color), Color.blue(color));
+                    int fill = Color.argb(42, Color.red(color), Color.green(color), Color.blue(color));
                     t.setText("●\n" + COLOR_NAMES[position]);
                     t.setTextColor(color);
                     t.setBackground(rounded(activity, fill, color, 14));
@@ -147,18 +137,24 @@ public final class Personalization {
                 return t;
             }
         });
+        final AlertDialog[] box = new AlertDialog[1];
+        box[0] = new AlertDialog.Builder(activity)
+                .setTitle("Choisir une couleur")
+                .setView(grid)
+                .setNegativeButton("Annuler", null)
+                .create();
         grid.setOnItemClickListener((parent, view, position, id) -> {
             if (position < COLORS.length) {
                 callback.onColor(COLORS[position]);
-                dismissParentDialog(grid);
+                box[0].dismiss();
             } else {
-                showCustomHex(activity, current, callback, grid);
+                showCustomHex(activity, current, callback, box[0]);
             }
         });
-        return grid;
+        box[0].show();
     }
 
-    private static void showCustomHex(Activity activity, String current, ColorCallback callback, View parent) {
+    private static void showCustomHex(Activity activity, String current, ColorCallback callback, AlertDialog parent) {
         EditText input = new EditText(activity);
         input.setSingleLine(true);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -174,14 +170,13 @@ public final class Personalization {
                 .create();
         d.setOnShowListener(x -> d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String raw = input.getText().toString().trim();
-            String normalized = normalizeHex(raw);
-            if (!normalized.equalsIgnoreCase(raw.startsWith("#") ? raw : "#" + raw)) {
+            if (!isValidHex(raw)) {
                 input.setError("HEX invalide : utilisez #RRGGBB");
                 return;
             }
-            callback.onColor(normalized);
+            callback.onColor(normalizeHex(raw));
             d.dismiss();
-            dismissParentDialog(parent);
+            parent.dismiss();
         }));
         d.show();
     }
@@ -205,7 +200,7 @@ public final class Personalization {
                 return t;
             }
         });
-        AlertDialog dialog = new AlertDialog.Builder(activity)
+        final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setTitle("Choisir un emoji")
                 .setView(grid)
                 .setNegativeButton("Annuler", null)
@@ -246,16 +241,5 @@ public final class Personalization {
             parent.dismiss();
         }));
         d.show();
-    }
-
-    private static void dismissParentDialog(View child) {
-        View root = child;
-        while (root.getParent() instanceof View) root = (View) root.getParent();
-        // Le parent AlertDialog n'est pas directement exposé par la hiérarchie ;
-        // le callback met à jour l'UI immédiatement, l'utilisateur peut fermer avec Retour.
-    }
-
-    public static void invalidHexToast(Activity activity) {
-        Toast.makeText(activity, "Couleur HEX invalide", Toast.LENGTH_SHORT).show();
     }
 }
