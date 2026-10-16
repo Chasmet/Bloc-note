@@ -337,7 +337,7 @@ public class NoteDatabase extends SQLiteOpenHelper {
             args.add(String.valueOf(folderId));
         }
 
-        Cursor c = db.query("notes", new String[]{"id","title","body","tags","color","emoji","favorite","pinned","archived","trashed","updated_at"}, where, args.toArray(new String[0]), null, null, "pinned DESC, updated_at DESC", "1000");
+        Cursor c = db.query("notes", new String[]{"id","title","substr(body,1,240) AS body","tags","color","emoji","favorite","pinned","archived","trashed","updated_at"}, where, args.toArray(new String[0]), null, null, "pinned DESC, updated_at DESC", "1000");
         while (c.moveToNext()) {
             Item x = new Item();
             x.id = c.getLong(0);
