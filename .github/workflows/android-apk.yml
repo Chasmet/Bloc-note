@@ -1,62 +1,63 @@
-# Signature Android stable V2 conservee via le cache prive GitHub Actions
-name: Build Bloc Note Ultra APK
-
+name: Sync 30 Bloc-note — Android APK et mise à jour
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "app/**"
       - "build.gradle"
       - "settings.gradle"
       - "gradle/**"
       - ".github/workflows/android-apk.yml"
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-
       - name: Gradle 8.7
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
-
-      - name: Stable Android debug signing cache
+      - name: Numéro de version automatique
+        shell: bash
+        run: |
+          code=$((100 + GITHUB_RUN_NUMBER))
+          echo "CI_VERSION_CODE=$code" >> "$GITHUB_ENV"
+          echo "CI_VERSION_NAME=3.0.$code" >> "$GITHUB_ENV"
+      - name: Restaurer la clé de signature existante
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
           key: bloc-note-ultra-stable-signing-v2
-
-      - name: Ensure stable Android signing key
+      - name: Restaurer sauvegarde de clé privée facultative
+        env:
+          SIGNING_KEY_BACKUP: ${{ secrets.SYNC30_DEBUG_KEYSTORE_BASE64 }}
         run: |
-          mkdir -p "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
-            keytool -genkeypair \
-              -keystore "$HOME/.android/debug.keystore" \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -dname "CN=Android Debug,O=Android,C=US" \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000
+          if [ -n "$SIGNING_KEY_BACKUP" ]; then
+            mkdir -p "$HOME/.android"
+            printf '%s' "$SIGNING_KEY_BACKUP" | base64 -d > "$HOME/.android/debug.keystore"
           fi
-          keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
-
-      - name: Android SDK 34
+      - name: Vérifier la signature historique sans en générer une nouvelle
+        run: |
+          if [ ! -s "$HOME/.android/debug.keystore" ]; then
+            echo "::error::Clé historique manquante. Sauvegarder la clé de l'ancien build dans le secret SYNC30_DEBUG_KEYSTORE_BASE64."
+            exit 1
+          fi
+          keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey
+      - name: Installer Android SDK 34
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           if [ ! -x "$SDKMANAGER" ]; then
@@ -64,22 +65,27 @@ jobs:
           fi
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0"
-
-      - name: Generate Gradle wrapper
+      - name: Créer Gradle Wrapper
         run: gradle wrapper --gradle-version 8.7
-
-      - name: Build real debug APK
+      - name: Construire un APK Android réel
         run: |
           chmod +x gradlew
           ./gradlew clean assembleDebug --stacktrace
-
-      - name: Prepare APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk Bloc-Note-Ultra-V2-Personnalisation.apk
-
-      - name: Upload APK artifact
+      - name: Renommer l'APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk "Sync-30-Bloc-note-v${CI_VERSION_CODE}.apk"
+      - name: Publier Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Bloc-Note-Ultra-V2-APK
-          path: Bloc-Note-Ultra-V2-Personnalisation.apk
+          name: Sync-30-Bloc-note-v${{ env.CI_VERSION_CODE }}
+          path: Sync-30-Bloc-note-v*.apk
           if-no-files-found: error
           retention-days: 30
+      - name: Publier la Release et son APK installable
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${CI_VERSION_CODE}" "Sync-30-Bloc-note-v${CI_VERSION_CODE}.apk" \
+            --title "Sync 30 Bloc-note v${CI_VERSION_CODE}" \
+            --notes "Mise à jour Android automatique. Même package et même clé de signature : notes conservées." \
+            --latest

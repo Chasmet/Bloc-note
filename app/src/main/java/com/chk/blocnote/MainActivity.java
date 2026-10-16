@@ -301,6 +301,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (db != null) reload();
+        UpdateManager.resumePendingInstall(this);
         UpdateManager.check(this, false);
         maybeAskPin();
     }
