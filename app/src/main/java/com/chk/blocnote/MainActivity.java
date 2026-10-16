@@ -9,6 +9,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -40,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
     private static final int REQ_EXPORT = 201;
@@ -49,6 +53,10 @@ public class MainActivity extends Activity {
     private long currentFolder = 0;
     private String filter = "notes";
     private String query = "";
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService listExecutor = Executors.newSingleThreadExecutor();
+    private volatile int listGeneration = 0;
+    private final Runnable delayedSearch = this::reload;
     private SearchView search;
     private GridView list;
     private TextView title, breadcrumb, stats;
@@ -92,6 +100,8 @@ public class MainActivity extends Activity {
 
         adapter = new NotesAdapter(this);
         list.setAdapter(adapter);
+        list.setScrollingCacheEnabled(true);
+        list.setSmoothScrollbarEnabled(true);
 
         btnNew.setOnClickListener(v -> createNote());
         btnFolder.setOnClickListener(v -> showFolderEditor(null));
@@ -103,8 +113,8 @@ public class MainActivity extends Activity {
         filterTrash.setOnClickListener(v -> setFilter("trash"));
 
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override public boolean onQueryTextSubmit(String q) { query = q; reload(); return true; }
-            @Override public boolean onQueryTextChange(String q) { query = q; reload(); return true; }
+            @Override public boolean onQueryTextSubmit(String q) { query = q; mainHandler.removeCallbacks(delayedSearch); reload(); return true; }
+            @Override public boolean onQueryTextChange(String q) { query = q; mainHandler.removeCallbacks(delayedSearch); mainHandler.postDelayed(delayedSearch, 230); return true; }
         });
 
         list.setOnItemClickListener((parent, view, position, id) -> {
@@ -139,35 +149,45 @@ public class MainActivity extends Activity {
         reload();
     }
 
+    // Chargement des listes et compteurs hors du fil graphique : aucun blocage du défilement.
     private void reload() {
-        if (db == null) return;
-        items = db.listItems(currentFolder, filter, query);
-        adapter.notifyDataSetChanged();
-
-        if ("notes".equals(filter)) {
-            if (currentFolder == 0) {
-                title.setText("Mes notes");
-                title.setTextColor(Personalization.parseColor(accentColor));
-            } else {
-                title.setText(db.getFolderEmoji(currentFolder) + " " + db.getFolderName(currentFolder));
-                title.setTextColor(Personalization.parseColor(db.getFolderColor(currentFolder)));
-            }
-        } else {
-            title.setText(filterTitle());
-            title.setTextColor(Personalization.parseColor(accentColor));
-        }
-
-        breadcrumb.setText(query.trim().isEmpty() ? db.getFolderPath(currentFolder) : "Recherche : “" + query + "”");
-        int total = db.countActiveNotes();
-        int fav = db.countFavorites();
-        int trash = db.countTrash();
-        stats.setText(total + " notes • " + fav + " favorites • " + trash + " dans la corbeille");
-        btnBackFolder.setEnabled(currentFolder != 0 && "notes".equals(filter));
-        filterNotes.setAlpha("notes".equals(filter) ? 1f : .52f);
-        filterFav.setAlpha("fav".equals(filter) ? 1f : .52f);
-        filterArchive.setAlpha("archive".equals(filter) ? 1f : .52f);
-        filterTrash.setAlpha("trash".equals(filter) ? 1f : .52f);
-        applyAccent();
+        if (db == null || listExecutor.isShutdown()) return;
+        mainHandler.removeCallbacks(delayedSearch);
+        final long folderId = currentFolder;
+        final String selectedFilter = filter;
+        final String searchText = query;
+        final int generation = ++listGeneration;
+        listExecutor.execute(() -> {
+            if (generation != listGeneration) return;
+            final List<NoteDatabase.Item> result = db.listItems(folderId, selectedFilter, searchText);
+            if (generation != listGeneration) return;
+            final String folderName = folderId == 0 ? "Mes notes" : db.getFolderEmoji(folderId) + " " + db.getFolderName(folderId);
+            final String folderColor = folderId == 0 ? accentColor : db.getFolderColor(folderId);
+            final String folderPath = db.getFolderPath(folderId);
+            final int total = db.countActiveNotes();
+            final int fav = db.countFavorites();
+            final int trash = db.countTrash();
+            mainHandler.post(() -> {
+                if (generation != listGeneration || isFinishing() || isDestroyed()) return;
+                items = result;
+                adapter.notifyDataSetChanged();
+                if ("notes".equals(selectedFilter)) {
+                    title.setText(folderName);
+                    title.setTextColor(Personalization.parseColor(folderColor));
+                } else {
+                    title.setText(filterTitle());
+                    title.setTextColor(Personalization.parseColor(accentColor));
+                }
+                breadcrumb.setText(searchText.trim().isEmpty() ? folderPath : "Recherche : “" + searchText + "”");
+                stats.setText(total + " notes • " + fav + " favoris • " + trash + " dans la corbeille");
+                btnBackFolder.setEnabled(folderId != 0 && "notes".equals(selectedFilter));
+                filterNotes.setAlpha("notes".equals(selectedFilter) ? 1f : .52f);
+                filterFav.setAlpha("fav".equals(selectedFilter) ? 1f : .52f);
+                filterArchive.setAlpha("archive".equals(selectedFilter) ? 1f : .52f);
+                filterTrash.setAlpha("trash".equals(selectedFilter) ? 1f : .52f);
+                applyAccent();
+            });
+        });
     }
 
     private String filterTitle() {
@@ -281,6 +301,8 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (db != null) reload();
+        UpdateManager.resumePendingInstall(this);
+        UpdateManager.check(this, false);
         maybeAskPin();
     }
 
@@ -414,7 +436,8 @@ public class MainActivity extends Activity {
         p.getMenu().add(0, 101, 6, "⬆ Importer sauvegarde JSON");
         p.getMenu().add(0, 102, 7, prefs.getString("pin_hash", "").isEmpty() ? "🔒 Activer verrouillage PIN" : "🔐 Modifier / désactiver le PIN");
         p.getMenu().add(0, 104, 8, "🗑 Vider définitivement la corbeille");
-        p.getMenu().add(0, 105, 9, "À propos");
+        p.getMenu().add(0, 110, 9, "🔄 Vérifier les mises à jour");
+        p.getMenu().add(0, 105, 10, "À propos");
         p.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == 100) exportBackup();
@@ -426,7 +449,8 @@ public class MainActivity extends Activity {
             else if (id == 107) toggleCompactMode();
             else if (id == 108) chooseAppAccent();
             else if (id == 109) chooseTextSize();
-            else if (id == 105) new AlertDialog.Builder(this).setTitle("Bloc Note Ultra V2")
+            else if (id == 110) UpdateManager.check(this, true);
+            else if (id == 105) new AlertDialog.Builder(this).setTitle("Sync 30 Bloc-note")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
             return true;
@@ -650,7 +674,12 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (db != null) db.close();
+        ++listGeneration;
+        mainHandler.removeCallbacksAndMessages(null);
+        if (!listExecutor.isShutdown()) {
+            listExecutor.execute(() -> { if (db != null) db.close(); });
+            listExecutor.shutdown();
+        }
         super.onDestroy();
     }
 

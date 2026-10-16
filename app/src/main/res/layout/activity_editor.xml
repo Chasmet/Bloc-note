@@ -3,115 +3,72 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:paddingLeft="6dp"
+    android:paddingRight="6dp">
 
-    <View
-        android:id="@+id/noteAccent"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:layout_marginBottom="6dp" />
+    <View android:id="@+id/noteAccent"
+        android:layout_width="match_parent" android:layout_height="3dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/editorBack"
-            android:layout_width="56dp"
-            android:layout_height="48dp"
-            android:minWidth="0dp"
-            android:text="←" />
-
-        <TextView
-            android:id="@+id/styleEmoji"
-            android:layout_width="52dp"
-            android:layout_height="48dp"
-            android:gravity="center"
-            android:text="📝"
-            android:textSize="25sp" />
-
-        <TextView
-            android:id="@+id/saveState"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="Sauvegardé"
-            android:textSize="13sp"
-            android:alpha="0.72" />
-
-        <Button
-            android:id="@+id/editorMenu"
-            android:layout_width="56dp"
-            android:layout_height="48dp"
-            android:minWidth="0dp"
-            android:text="⋮"
-            android:textSize="24sp" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="44dp"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <Button android:id="@+id/editorBack" android:layout_width="44dp"
+            android:layout_height="42dp" android:minWidth="0dp" android:text="←" />
+        <TextView android:id="@+id/styleEmoji" android:layout_width="38dp"
+            android:layout_height="38dp" android:gravity="center"
+            android:text="📝" android:textSize="22sp" />
+        <TextView android:id="@+id/saveState" android:layout_width="0dp"
+            android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="end" android:paddingRight="6dp" android:text="Sauvegardé"
+            android:textSize="12sp" android:alpha=".75" />
+        <Button android:id="@+id/editorMenu" android:layout_width="44dp"
+            android:layout_height="42dp" android:minWidth="0dp" android:text="⋮"
+            android:textSize="22sp" />
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/noteTitle"
-        android:layout_width="match_parent"
-        android:layout_height="58dp"
-        android:background="@android:color/transparent"
-        android:hint="Titre"
-        android:maxLines="1"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+    <EditText android:id="@+id/noteTitle" android:layout_width="match_parent"
+        android:layout_height="48dp" android:background="@android:color/transparent"
+        android:hint="Titre de la note" android:singleLine="true"
+        android:paddingLeft="9dp" android:paddingRight="9dp"
+        android:textSize="21sp" android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/noteTags"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="Tags : travail, idée, musique…"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:singleLine="true"
-        android:textSize="14sp" />
+    <EditText android:id="@+id/noteTags" android:layout_width="match_parent"
+        android:layout_height="43dp" android:hint="Tags : musique, travail, idées…"
+        android:paddingLeft="9dp" android:paddingRight="9dp"
+        android:singleLine="true" android:textSize="14sp" android:visibility="gone" />
 
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:scrollbars="none">
+    <EditText android:id="@+id/noteBody" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1"
+        android:background="@android:color/transparent" android:gravity="top|start"
+        android:hint="Écris librement…" android:inputType="textCapSentences|textMultiLine"
+        android:paddingLeft="10dp" android:paddingRight="10dp"
+        android:paddingTop="7dp" android:paddingBottom="10dp"
+        android:scrollbars="vertical" android:scrollbarStyle="outsideOverlay"
+        android:overScrollMode="ifContentScrolls" android:includeFontPadding="false"
+        android:lineSpacingExtra="2dp" android:textSize="17sp" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button android:id="@+id/toolBullet" android:layout_width="wrap_content" android:layout_height="46dp" android:text="• Liste" />
-            <Button android:id="@+id/toolCheck" android:layout_width="wrap_content" android:layout_height="46dp" android:text="☐ Tâche" />
-            <Button android:id="@+id/toolDate" android:layout_width="wrap_content" android:layout_height="46dp" android:text="Date" />
-            <Button android:id="@+id/toolVoice" android:layout_width="wrap_content" android:layout_height="46dp" android:text="🎙 Dictée" />
-            <Button android:id="@+id/toolColor" android:layout_width="wrap_content" android:layout_height="46dp" android:text="🎨 Couleur" />
-            <Button android:id="@+id/toolEmoji" android:layout_width="wrap_content" android:layout_height="46dp" android:text="😀 Emoji" />
+    <HorizontalScrollView android:layout_width="match_parent"
+        android:layout_height="45dp" android:scrollbars="none">
+        <LinearLayout android:layout_width="wrap_content"
+            android:layout_height="match_parent" android:orientation="horizontal">
+            <Button android:id="@+id/toolBullet" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="• Liste" />
+            <Button android:id="@+id/toolCheck" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="☐ Tâche" />
+            <Button android:id="@+id/toolDate" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="Date" />
+            <Button android:id="@+id/toolVoice" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="🎙 Dictée" />
+            <Button android:id="@+id/toolTags" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="# Tags" />
+            <Button android:id="@+id/toolColor" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="🎨 Couleur" />
+            <Button android:id="@+id/toolEmoji" android:layout_width="wrap_content"
+                android:layout_height="43dp" android:text="😀 Emoji" />
         </LinearLayout>
     </HorizontalScrollView>
 
-    <EditText
-        android:id="@+id/noteBody"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@android:color/transparent"
-        android:gravity="top|start"
-        android:hint="Écrivez ici…"
-        android:inputType="textCapSentences|textMultiLine"
-        android:padding="10dp"
-        android:scrollbars="vertical"
-        android:textSize="17sp" />
-
-    <TextView
-        android:id="@+id/editorStats"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:gravity="center_vertical|end"
-        android:paddingRight="8dp"
-        android:text="0 mot • 0 caractère"
-        android:textSize="12sp"
-        android:alpha="0.68" />
+    <TextView android:id="@+id/editorStats" android:layout_width="match_parent"
+        android:layout_height="24dp" android:gravity="center_vertical|end"
+        android:paddingRight="10dp" android:text="0 mot • 0 caractère"
+        android:textSize="11sp" android:alpha=".64" />
 </LinearLayout>

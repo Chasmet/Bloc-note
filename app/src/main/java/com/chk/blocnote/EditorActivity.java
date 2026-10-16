@@ -9,6 +9,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +43,10 @@ public class EditorActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean loading = true;
     private boolean dirty = false;
+    private int saveGeneration = 0;
+    private final ExecutorService writer = Executors.newSingleThreadExecutor();
+    private Future<?> pendingWrite;
+    private final Runnable delayedStats = this::updateStats;
 
     private final Runnable autosave = new Runnable() {
         @Override public void run() { saveNow(); }
@@ -48,6 +57,7 @@ public class EditorActivity extends Activity {
         prefs = getSharedPreferences("settings", MODE_PRIVATE);
         if (prefs.getBoolean("light", false)) setTheme(R.style.AppTheme_Light);
         super.onCreate(state);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_editor);
         db = new NoteDatabase(this);
         long id = getIntent().getLongExtra("note_id", -1);
@@ -76,6 +86,7 @@ public class EditorActivity extends Activity {
         findViewById(R.id.toolCheck).setOnClickListener(v -> insertAtCursor("☐ "));
         findViewById(R.id.toolDate).setOnClickListener(v -> insertDate());
         findViewById(R.id.toolVoice).setOnClickListener(v -> startVoice());
+        findViewById(R.id.toolTags).setOnClickListener(v -> toggleTags());
         toolColor.setOnClickListener(v -> chooseColor());
         toolEmoji.setOnClickListener(v -> chooseEmoji());
 
@@ -83,7 +94,8 @@ public class EditorActivity extends Activity {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!loading) markDirty();
-                updateStats();
+                handler.removeCallbacks(delayedStats);
+                handler.postDelayed(delayedStats, 320);
             }
             @Override public void afterTextChanged(Editable s) { }
         };
@@ -103,6 +115,7 @@ public class EditorActivity extends Activity {
         loading = false;
         updateStats();
         saveState.setText(note.trashed ? "Dans la corbeille" : "Sauvegardé");
+        tags.setVisibility(prefs.getBoolean("editor_show_tags", false) ? View.VISIBLE : View.GONE);
     }
 
     private void applyTextSize() {
@@ -134,6 +147,7 @@ public class EditorActivity extends Activity {
 
     private void chooseColor() {
         saveNow();
+        waitForPendingWrite();
         Personalization.showColorPicker(this, note.color, value -> {
             note.color = value;
             db.saveNote(note);
@@ -144,6 +158,7 @@ public class EditorActivity extends Activity {
 
     private void chooseEmoji() {
         saveNow();
+        waitForPendingWrite();
         Personalization.showEmojiPicker(this, note.emoji, value -> {
             note.emoji = value;
             db.saveNote(note);
@@ -159,15 +174,57 @@ public class EditorActivity extends Activity {
         handler.postDelayed(autosave, 550);
     }
 
+    // Une seule file d'écriture SQLite en arrière-plan. Les sauvegardes gardent l'ordre.
     private void saveNow() {
         handler.removeCallbacks(autosave);
-        if (!dirty || note == null) return;
-        note.title = title.getText().toString();
-        note.body = body.getText().toString();
-        note.tags = normalizeTags(tags.getText().toString());
-        db.saveNote(note);
+        if (!dirty || note == null || writer.isShutdown()) return;
+        NoteDatabase.Note snapshot = new NoteDatabase.Note();
+        snapshot.id = note.id;
+        snapshot.folderId = note.folderId;
+        snapshot.title = title.getText().toString();
+        snapshot.body = body.getText().toString();
+        snapshot.tags = normalizeTags(tags.getText().toString());
+        snapshot.color = note.color;
+        snapshot.emoji = note.emoji;
+        snapshot.favorite = note.favorite;
+        snapshot.pinned = note.pinned;
+        snapshot.archived = note.archived;
+        snapshot.trashed = note.trashed;
+        snapshot.createdAt = note.createdAt;
+        note.title = snapshot.title;
+        note.body = snapshot.body;
+        note.tags = snapshot.tags;
         dirty = false;
-        saveState.setText("Sauvegardé automatiquement");
+        final int generation = ++saveGeneration;
+        pendingWrite = writer.submit(() -> {
+            try {
+                db.saveNote(snapshot);
+                runOnUiThread(() -> {
+                    if (generation == saveGeneration && !dirty && !isFinishing()) {
+                        saveState.setText("✓ Sauvegardé");
+                    }
+                });
+            } catch (Exception ex) {
+                runOnUiThread(() -> {
+                    dirty = true;
+                    saveState.setText("Échec de sauvegarde — réessayer");
+                });
+            }
+        });
+    }
+
+    private void waitForPendingWrite() {
+        Future<?> last = pendingWrite;
+        if (last == null) return;
+        try { last.get(5, TimeUnit.SECONDS); }
+        catch (Exception ex) { saveState.setText("Sauvegarde à vérifier"); }
+    }
+
+    private void toggleTags() {
+        boolean visible = tags.getVisibility() != View.VISIBLE;
+        tags.setVisibility(visible ? View.VISIBLE : View.GONE);
+        prefs.edit().putBoolean("editor_show_tags", visible).apply();
+        if (visible) tags.requestFocus();
     }
 
     private String normalizeTags(String value) {
@@ -178,10 +235,18 @@ public class EditorActivity extends Activity {
     }
 
     private void updateStats() {
-        String text = body == null ? "" : body.getText().toString().trim();
-        int chars = body == null ? 0 : body.length();
-        int words = text.isEmpty() ? 0 : text.split("\\s+").length;
-        int lines = text.isEmpty() ? 0 : text.split("\\n", -1).length;
+        if (body == null) return;
+        CharSequence text = body.getText();
+        int chars = text.length();
+        int words = 0, lines = chars == 0 ? 0 : 1;
+        boolean inWord = false;
+        for (int i = 0; i < chars; i++) {
+            char c = text.charAt(i);
+            if (c == '\n') lines++;
+            boolean space = Character.isWhitespace(c);
+            if (!space && !inWord) words++;
+            inWord = !space;
+        }
         stats.setText(words + " mots • " + chars + " caractères • " + lines + " lignes");
     }
 
@@ -226,6 +291,7 @@ public class EditorActivity extends Activity {
 
     private void showMenu(View anchor) {
         saveNow();
+        waitForPendingWrite();
         note = db.getNote(note.id);
         if (note == null) return;
         applyStyle();
@@ -312,7 +378,11 @@ public class EditorActivity extends Activity {
     @Override
     protected void onDestroy() {
         handler.removeCallbacks(autosave);
-        if (db != null) db.close();
+        handler.removeCallbacks(delayedStats);
+        if (!writer.isShutdown()) {
+            writer.execute(() -> { if (db != null) db.close(); });
+            writer.shutdown();
+        }
         super.onDestroy();
     }
 
