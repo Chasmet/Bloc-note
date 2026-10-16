@@ -10,8 +10,8 @@ android {
         applicationId 'com.chk.blocnote'
         minSdk 21
         targetSdk 34
-        versionCode (System.getenv('CI_VERSION_CODE') ?: '3').toInteger()
-        versionName (System.getenv('CI_VERSION_NAME') ?: '3.0.0')
+        versionCode = (System.getenv('CI_VERSION_CODE') ?: '3').toInteger()
+        versionName = (System.getenv('CI_VERSION_NAME') ?: '3.0.0')
     }
 
     // Signature de debug stable utilisee par les builds GitHub Actions V2 et suivants.
