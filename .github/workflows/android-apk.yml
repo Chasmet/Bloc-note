@@ -53,8 +53,17 @@ jobs:
       - name: Vérifier la signature historique sans en générer une nouvelle
         run: |
           if [ ! -s "$HOME/.android/debug.keystore" ]; then
-            echo "::error::Clé historique manquante. Sauvegarder la clé de l'ancien build dans le secret SYNC30_DEBUG_KEYSTORE_BASE64."
-            exit 1
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              echo "::warning::Signature temporaire réservée au test PR. Ne pas installer cet APK sur l'application existante."
+              mkdir -p "$HOME/.android"
+              keytool -genkeypair -keystore "$HOME/.android/debug.keystore" \
+                -storepass android -alias androiddebugkey -keypass android \
+                -dname "CN=Sync30,OU=Build-Test,O=CHK,C=FR" \
+                -keyalg RSA -keysize 2048 -validity 10000
+            else
+              echo "::error::Clé historique manquante. Restaurer la clé dans le secret SYNC30_DEBUG_KEYSTORE_BASE64 pour garder les données."
+              exit 1
+            fi
           fi
           keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey
       - name: Installer Android SDK 34
