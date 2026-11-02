@@ -73,6 +73,7 @@ public class MainActivity extends Activity {
         bind();
         loadPreferences();
         reload();
+        TestUpdateManager.check(this, false);
     }
 
     private void bind() {
@@ -414,7 +415,8 @@ public class MainActivity extends Activity {
         p.getMenu().add(0, 101, 6, "⬆ Importer sauvegarde JSON");
         p.getMenu().add(0, 102, 7, prefs.getString("pin_hash", "").isEmpty() ? "🔒 Activer verrouillage PIN" : "🔐 Modifier / désactiver le PIN");
         p.getMenu().add(0, 104, 8, "🗑 Vider définitivement la corbeille");
-        p.getMenu().add(0, 105, 9, "À propos");
+        p.getMenu().add(0, 110, 9, "↻ Vérifier les mises à jour (test)");
+        p.getMenu().add(0, 105, 10, "À propos");
         p.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == 100) exportBackup();
@@ -426,7 +428,8 @@ public class MainActivity extends Activity {
             else if (id == 107) toggleCompactMode();
             else if (id == 108) chooseAppAccent();
             else if (id == 109) chooseTextSize();
-            else if (id == 105) new AlertDialog.Builder(this).setTitle("Bloc Note Ultra V2")
+            else if (id == 110) TestUpdateManager.check(this, true);
+            else if (id == 105) new AlertDialog.Builder(this).setTitle("Bloc Note Ultra – Version de test")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
             return true;

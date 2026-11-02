@@ -1,9 +1,8 @@
-# Signature Android stable V2 conservee via le cache prive GitHub Actions
-name: Build Bloc Note Ultra APK
+name: Bloc Note Ultra - APK de test et mises a jour
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - "app/**"
       - "build.gradle"
@@ -13,37 +12,46 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: bloc-note-ultra-test-main
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Checkout
+      - name: Recuperer les sources
         uses: actions/checkout@v4
 
-      - name: Java 17
+      - name: Installer Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Gradle 8.7
+      - name: Installer Gradle 8.7
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
 
-      - name: Stable Android debug signing cache
+      # Reutiliser la signature des anciens APK V2 : ne jamais la remplacer par
+      # une autre cle si elle est indisponible, pour eviter de casser les mises a jour.
+      - name: Restaurer la signature de test V2
+        id: signing-cache
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
           key: bloc-note-ultra-stable-signing-v2
 
-      - name: Ensure stable Android signing key
+      - name: Verifier ou initialiser la signature de test
+        shell: bash
         run: |
           mkdir -p "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+          if [ ! -s "$HOME/.android/debug.keystore" ]; then
+            echo "::warning::Cache signature V2 absent : la compatibilite avec les anciens APK doit etre verifiee."
             keytool -genkeypair \
               -keystore "$HOME/.android/debug.keystore" \
               -storepass android \
@@ -54,32 +62,52 @@ jobs:
               -keysize 2048 \
               -validity 10000
           fi
-          keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
+          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | grep "SHA256:" | head -1 >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Android SDK 34
+      - name: SDK Android 34
         run: |
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$SDKMANAGER" ]; then
-            SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          fi
+          SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Generate Gradle wrapper
+      - name: Preparer Gradle
         run: gradle wrapper --gradle-version 8.7
 
-      - name: Build real debug APK
+      - name: Calculer version test
+        id: version
+        shell: bash
+        run: |
+          echo "name=2.1.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "code=$((21000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      - name: Compiler APK de test avec signature stable V2
+        shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew clean assembleDebug --stacktrace
+          ./gradlew clean assembleDebug --stacktrace \
+            -PversionCode=${{ steps.version.outputs.code }} \
+            -PversionName=${{ steps.version.outputs.name }}
 
-      - name: Prepare APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk Bloc-Note-Ultra-V2-Personnalisation.apk
+      - name: Verifier APK compile
+        shell: bash
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools/34.0.0/apksigner" verify --print-certs app/build/outputs/apk/debug/app-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk "Bloc-Note-Ultra-test-${{ steps.version.outputs.name }}.apk"
 
-      - name: Upload APK artifact
+      - name: Artefact GitHub Actions
         uses: actions/upload-artifact@v4
         with:
-          name: Bloc-Note-Ultra-V2-APK
-          path: Bloc-Note-Ultra-V2-Personnalisation.apk
+          name: Bloc-Note-Ultra-test-${{ steps.version.outputs.name }}
+          path: Bloc-Note-Ultra-test-${{ steps.version.outputs.name }}.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publier la version de test telechargeable
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.name }}
+          name: Bloc Note Ultra - test v${{ steps.version.outputs.name }}
+          prerelease: true
+          generate_release_notes: true
+          files: Bloc-Note-Ultra-test-${{ steps.version.outputs.name }}.apk
