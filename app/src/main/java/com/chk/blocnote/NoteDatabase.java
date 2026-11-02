@@ -320,21 +320,29 @@ public class NoteDatabase extends SQLiteOpenHelper {
             f.close();
         }
 
+        // Appliquer la collection AVANT le terme de recherche.
+        // L'ancienne implementation ignorait favoris/archive/corbeille lorsque q etait saisi.
         String where;
         ArrayList<String> args = new ArrayList<>();
-        if (!q.isEmpty()) {
-            where = "trashed=0 AND (title LIKE ? OR body LIKE ? OR tags LIKE ?)";
-            String like = "%" + q + "%";
-            args.add(like); args.add(like); args.add(like);
-        } else if ("fav".equals(filter)) {
+        if ("fav".equals(filter)) {
             where = "favorite=1 AND trashed=0";
         } else if ("archive".equals(filter)) {
             where = "archived=1 AND trashed=0";
         } else if ("trash".equals(filter)) {
             where = "trashed=1";
+        } else if (!q.isEmpty()) {
+            // Recherche globale dans les notes actives (tous les dossiers).
+            where = "trashed=0 AND archived=0";
         } else {
             where = "folder_id=? AND archived=0 AND trashed=0";
             args.add(String.valueOf(folderId));
+        }
+        if (!q.isEmpty()) {
+            where += " AND (title LIKE ? OR body LIKE ? OR tags LIKE ?)";
+            String like = "%" + q + "%";
+            args.add(like);
+            args.add(like);
+            args.add(like);
         }
 
         Cursor c = db.query("notes", new String[]{"id","title","body","tags","color","emoji","favorite","pinned","archived","trashed","updated_at"}, where, args.toArray(new String[0]), null, null, "pinned DESC, updated_at DESC", "1000");
