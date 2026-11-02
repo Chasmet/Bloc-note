@@ -174,8 +174,13 @@ public class MainActivity extends Activity {
         if (db == null) return;
         if ("folders".equals(filter)) {
             items = new ArrayList<>();
-            for (NoteDatabase.Item folder : db.getAllFolders()) {
-                if (query.trim().isEmpty() || folder.title.toLowerCase(Locale.ROOT).contains(query.trim().toLowerCase(Locale.ROOT))) items.add(folder);
+            // Afficher uniquement les sous-dossiers du dossier courant.
+            // getAllFolders() renverrait aussi les dossiers des autres emplacements.
+            for (NoteDatabase.Item child : db.listItems(currentFolder, "notes", "")) {
+                if (child.folder && (query.trim().isEmpty()
+                        || child.title.toLowerCase(Locale.ROOT).contains(query.trim().toLowerCase(Locale.ROOT)))) {
+                    items.add(child);
+                }
             }
         } else items = db.listItems(currentFolder, filter, query);
         adapter.notifyDataSetChanged();

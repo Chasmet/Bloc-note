@@ -88,6 +88,20 @@ jobs:
           b=Path("app/src/main/res/drawable-nodpi/ic_note_brand.jpg").read_bytes()
           assert len(b)>1000 and b.startswith(bytes.fromhex("ffd8ff")) and b.endswith(bytes.fromhex("ffd9")), "JPEG invalide"
           PY
+          cat >/tmp/VerifyImage.java <<'JAVA'
+          import java.awt.image.BufferedImage;
+          import java.io.File;
+          import javax.imageio.ImageIO;
+          class VerifyImage {
+              public static void main(String[] args) throws Exception {
+                  BufferedImage image = ImageIO.read(new File(args[0]));
+                  if (image == null || image.getWidth()<100 || image.getHeight()<100) throw new IllegalStateException("JPEG illisible");
+                  image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+                  System.out.println("Logo valide "+image.getWidth()+"x"+image.getHeight());
+              }
+          }
+          JAVA
+          java /tmp/VerifyImage.java app/src/main/res/drawable-nodpi/ic_note_brand.jpg
       - name: Compiler APK de test avec signature stable V2
         shell: bash
         run: |
