@@ -12,6 +12,7 @@ android {
         targetSdk 34
         versionCode = (providers.gradleProperty('versionCode').orNull ?: '2').toInteger()
         versionName = providers.gradleProperty('versionName').orNull ?: '2.0.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     // Signature de debug stable utilisee par les builds GitHub Actions V2 et suivants.
@@ -41,4 +42,9 @@ android {
 }
 
 dependencies {
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
