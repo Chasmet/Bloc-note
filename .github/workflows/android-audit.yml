@@ -52,7 +52,7 @@ jobs:
           profile: pixel_2
           target: default
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest --stacktrace --no-daemon
+          script: bash .github/scripts/run-android-audit.sh
       - name: Afficher les resultats JUnit
         if: always()
         shell: bash
@@ -85,4 +85,6 @@ jobs:
           path: |
             app/build/outputs/androidTest-results/connected/
             app/build/reports/androidTests/connected/
+            app/build/reports/androidTests/emulator-screen.png
+            app/build/reports/androidTests/window-focus.txt
           if-no-files-found: warn
