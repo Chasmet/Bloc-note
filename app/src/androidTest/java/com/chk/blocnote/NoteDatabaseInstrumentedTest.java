@@ -126,10 +126,14 @@ public class NoteDatabaseInstrumentedTest {
         t.title = "Rapport supprimé";
         db.saveNote(t);
         db.setNoteFlag(trashId, "trashed", true);
-        assertEquals("La recherche en corbeille doit rester dans la corbeille",
-                1, db.listItems(0, "trash", "Rapport").size());
+        List<NoteDatabase.Item> trash = db.listItems(0, "trash", "Rapport");
+        assertEquals("La recherche en corbeille doit rester dans la corbeille", 1, trash.size());
+        assertEquals("Le resultat de la corbeille doit etre la note supprimee", trashId, trash.get(0).id);
         assertEquals("La recherche dans les favoris ne doit pas inclure les notes ordinaires",
                 0, db.listItems(0, "fav", "Rapport").size());
+        assertEquals("La recherche dans les archives doit exclure les notes actives",
+                0, db.listItems(0, "archive", "Rapport").size());
+        assertEquals(1, db.listItems(0, "notes", "Rapport unique").size());
     }
 
     @Test public void longNoteRoundTrip() {

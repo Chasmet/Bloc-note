@@ -11,7 +11,11 @@ on:
 permissions:
   contents: read
 jobs:
-  android-emulator-api29:
+  android-emulator: 
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [29, 36]
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
@@ -43,17 +47,41 @@ jobs:
       - name: Android emulator UI and SQLite tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: ${{ matrix.api-level }}
           arch: x86_64
           profile: pixel_2
           target: default
           disable-animations: true
           script: ./gradlew :app:connectedDebugAndroidTest --stacktrace --no-daemon
+      - name: Afficher les resultats JUnit
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as E
+          total=failed=skipped=0
+          for f in Path("app/build/outputs/androidTest-results/connected").rglob("*.xml"):
+              try:
+                  root=E.parse(f).getroot()
+                  for suite in ([root] if root.tag=="testsuite" else root.findall(".//testsuite")):
+                      cases=suite.findall("testcase")
+                      total+=len(cases)
+                      for c in cases:
+                          if c.find("failure") is not None or c.find("error") is not None:
+                              failed+=1
+                              print("ECHEC",c.get("classname"),c.get("name"))
+                          elif c.find("skipped") is not None:
+                              skipped+=1
+              except Exception as e:
+                  print("Rapport non lu:",f,str(e))
+          print("RESULTATS: tests=",total,"echecs=",failed,"ignores=",skipped)
+          PY
       - name: Upload instrumentation test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: blocnote-audit-api29
+          name: blocnote-audit-api${{ matrix.api-level }}
           path: |
             app/build/outputs/androidTest-results/connected/
             app/build/reports/androidTests/connected/
