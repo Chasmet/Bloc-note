@@ -55,6 +55,12 @@ public class EditorActivity extends Activity {
         if (note == null) { finish(); return; }
         bind();
         load();
+        if (state != null && state.getBoolean("draft", false)) {
+            title.setText(state.getString("draft_title", ""));
+            body.setText(state.getString("draft_body", ""));
+            tags.setText(state.getString("draft_tags", ""));
+            markDirty();
+        }
     }
 
     private void bind() {
@@ -115,10 +121,11 @@ public class EditorActivity extends Activity {
 
     private void applyStyle() {
         if (note == null) return;
-        int color = Personalization.parseColor(note.color);
+        String shownColor = "#6750A4".equalsIgnoreCase(note.color) ? Personalization.DEFAULT_COLOR : note.color;
+        int color = Personalization.parseColor(shownColor);
         noteAccent.setBackgroundColor(color);
         styleEmoji.setText(note.emoji == null || note.emoji.trim().isEmpty() ? Personalization.DEFAULT_NOTE_EMOJI : note.emoji);
-        styleEmoji.setBackground(Personalization.iconBubble(this, note.color, prefs.getBoolean("light", false)));
+        styleEmoji.setBackground(Personalization.iconBubble(this, shownColor, prefs.getBoolean("light", false)));
         ColorStateList tint = ColorStateList.valueOf(color);
         editorMenu.setBackgroundTintList(tint);
         toolColor.setBackgroundTintList(tint);
@@ -165,9 +172,14 @@ public class EditorActivity extends Activity {
         note.title = title.getText().toString();
         note.body = body.getText().toString();
         note.tags = normalizeTags(tags.getText().toString());
-        db.saveNote(note);
-        dirty = false;
-        saveState.setText("Sauvegardé automatiquement");
+        try {
+            db.saveNote(note);
+            dirty = false;
+            saveState.setText("Sauvegardé automatiquement");
+        } catch (Exception error) {
+            dirty = true;
+            saveState.setText("Échec sauvegarde : réessayez");
+        }
     }
 
     private String normalizeTags(String value) {
@@ -301,6 +313,17 @@ public class EditorActivity extends Activity {
                 .setMessage("Cette note ne pourra plus être récupérée.")
                 .setNegativeButton("Annuler", null)
                 .setPositiveButton("Supprimer", (d, w) -> { db.deleteNoteForever(note.id); finish(); }).show();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putBoolean("draft", dirty);
+        if (dirty) {
+            state.putString("draft_title", title.getText().toString());
+            state.putString("draft_body", body.getText().toString());
+            state.putString("draft_tags", tags.getText().toString());
+        }
+        super.onSaveInstanceState(state);
     }
 
     @Override

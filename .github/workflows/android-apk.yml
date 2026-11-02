@@ -77,9 +77,17 @@ jobs:
         id: version
         shell: bash
         run: |
-          echo "name=2.1.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
-          echo "code=$((21000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+          echo "name=2.2.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "code=$((22000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
 
+      - name: Verifier logo JPEG
+        run: |
+          file app/src/main/res/drawable-nodpi/ic_note_brand.jpg
+          python3 - <<'PY'
+          from pathlib import Path
+          b=Path("app/src/main/res/drawable-nodpi/ic_note_brand.jpg").read_bytes()
+          assert len(b)>1000 and b.startswith(bytes.fromhex("ffd8ff")) and b.endswith(bytes.fromhex("ffd9")), "JPEG invalide"
+          PY
       - name: Compiler APK de test avec signature stable V2
         shell: bash
         run: |

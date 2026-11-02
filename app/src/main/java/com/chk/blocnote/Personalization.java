@@ -17,12 +17,12 @@ public final class Personalization {
     public interface ColorCallback { void onColor(String hex); }
     public interface EmojiCallback { void onEmoji(String emoji); }
 
-    public static final String DEFAULT_COLOR = "#6750A4";
+    public static final String DEFAULT_COLOR = "#D7832B";
     public static final String DEFAULT_FOLDER_EMOJI = "📁";
     public static final String DEFAULT_NOTE_EMOJI = "📝";
 
     private static final String[] COLORS = {
-            "#6750A4", "#7C4DFF", "#536DFE", "#2979FF",
+            "#D7832B", "#B65A1D", "#F5AA4B", "#2979FF",
             "#00B8D4", "#00BFA5", "#00C853", "#64DD17",
             "#FFD600", "#FFAB00", "#FF6D00", "#DD2C00",
             "#D50000", "#C51162", "#AA00FF", "#6200EA",
@@ -30,7 +30,7 @@ public final class Personalization {
     };
 
     private static final String[] COLOR_NAMES = {
-            "Violet", "Lavande", "Indigo", "Bleu",
+            "Cuivre", "Brun chaud", "Ambre", "Bleu",
             "Cyan", "Turquoise", "Vert", "Citron",
             "Jaune", "Ambre", "Orange", "Corail",
             "Rouge", "Rose", "Fuchsia", "Violet profond",
@@ -94,7 +94,7 @@ public final class Personalization {
 
     public static GradientDrawable card(Activity a, String colorHex, boolean light) {
         int accent = parseColor(colorHex);
-        int base = light ? Color.rgb(250, 250, 252) : Color.rgb(13, 18, 29);
+        int base = light ? Color.rgb(250, 250, 252) : Color.rgb(26, 17, 12);
         int fill = blend(base, accent, light ? .10f : .16f);
         int stroke = blend(base, accent, light ? .42f : .58f);
         return rounded(a, fill, stroke, 18);
@@ -102,7 +102,7 @@ public final class Personalization {
 
     public static GradientDrawable iconBubble(Activity a, String colorHex, boolean light) {
         int accent = parseColor(colorHex);
-        int base = light ? Color.WHITE : Color.rgb(13, 18, 29);
+        int base = light ? Color.WHITE : Color.rgb(26, 17, 12);
         return rounded(a, blend(base, accent, light ? .20f : .34f), accent, 16);
     }
 

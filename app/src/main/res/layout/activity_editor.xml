@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/bg_copper_app"
     android:padding="10dp">
 
     <View
@@ -56,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="58dp"
         android:background="@android:color/transparent"
-        android:hint="Titre"
+        android:hint="Titre de la note"
         android:maxLines="1"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
@@ -99,7 +100,7 @@
         android:layout_weight="1"
         android:background="@android:color/transparent"
         android:gravity="top|start"
-        android:hint="Écrivez ici…"
+        android:hint="Commencez à écrire…"
         android:inputType="textCapSentences|textMultiLine"
         android:padding="10dp"
         android:scrollbars="vertical"

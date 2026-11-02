@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/bg_copper_app"
     android:paddingTop="8dp">
 
     <LinearLayout
@@ -13,6 +14,9 @@
         android:paddingLeft="14dp"
         android:paddingRight="10dp">
 
+        <ImageView android:layout_width="54dp" android:layout_height="54dp"
+            android:src="@drawable/ic_note_brand"
+            android:contentDescription="Logo Sync 30 Bloc-note"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -25,8 +29,8 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Bloc Note Ultra"
-                android:textSize="25sp"
+                android:text="Sync 30 Bloc-note"
+                android:textSize="21sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -43,13 +47,13 @@
 
         <Button
             android:id="@+id/btnFolder"
-            android:layout_width="112dp"
+            android:layout_width="70dp"
             android:layout_height="48dp"
             android:layout_marginLeft="6dp"
             android:minWidth="0dp"
             android:paddingLeft="6dp"
             android:paddingRight="6dp"
-            android:text="+ DOSSIER"
+            android:text="📁＋"
             android:textSize="13sp" />
 
         <Button
@@ -69,7 +73,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="12dp"
         android:iconifiedByDefault="false"
-        android:queryHint="Rechercher dans les notes…" />
+        android:queryHint="Rechercher une note…"
+        android:background="@drawable/bg_copper_search" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -85,7 +90,8 @@
             android:layout_weight="1"
             android:minWidth="0dp"
             android:padding="0dp"
-            android:text="NOTES"
+            android:text="Toutes"
+            android:textAllCaps="false"
             android:textSize="11sp" />
 
         <Button
@@ -95,7 +101,8 @@
             android:layout_weight="1"
             android:minWidth="0dp"
             android:padding="0dp"
-            android:text="★ FAVORIS"
+            android:text="★ Favoris"
+            android:textAllCaps="false"
             android:textSize="11sp" />
 
         <Button
@@ -105,7 +112,8 @@
             android:layout_weight="1"
             android:minWidth="0dp"
             android:padding="0dp"
-            android:text="ARCHIVE"
+            android:text="Archive"
+            android:textAllCaps="false"
             android:textSize="11sp" />
 
         <Button
@@ -115,7 +123,8 @@
             android:layout_weight="1"
             android:minWidth="0dp"
             android:padding="0dp"
-            android:text="CORBEILLE"
+            android:text="Corbeille"
+            android:textAllCaps="false"
             android:textSize="10sp" />
     </LinearLayout>
 
@@ -130,6 +139,12 @@
         android:textSize="13sp"
         android:alpha="0.70" />
 
+    <TextView android:id="@+id/emptyState"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center" android:padding="18dp"
+        android:text="Aucune note dans cette section."
+        android:textColor="#D6B8A0" android:visibility="gone"/>
+
     <GridView
         android:id="@+id/list"
         android:layout_width="match_parent"
@@ -138,7 +153,7 @@
         android:clipToPadding="false"
         android:horizontalSpacing="8dp"
         android:listSelector="@android:color/transparent"
-        android:numColumns="1"
+        android:numColumns="2"
         android:paddingLeft="8dp"
         android:paddingTop="4dp"
         android:paddingRight="8dp"
@@ -170,5 +185,21 @@
             android:minWidth="0dp"
             android:text="＋ NOUVELLE NOTE"
             android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="65dp"
+        android:background="@drawable/bg_copper_nav" android:gravity="center"
+        android:orientation="horizontal" android:paddingLeft="7dp" android:paddingRight="7dp">
+        <Button android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="53dp"
+            android:layout_weight="1" android:minWidth="0dp" android:text="⌂ Accueil"
+            android:textAllCaps="false" android:textSize="12sp"/>
+        <Button android:id="@+id/navFolders" android:layout_width="0dp" android:layout_height="53dp"
+            android:layout_weight="1" android:minWidth="0dp" android:text="▣ Dossiers"
+            android:textAllCaps="false" android:textSize="12sp"/>
+        <Button android:id="@+id/navFavorites" android:layout_width="0dp" android:layout_height="53dp"
+            android:layout_weight="1" android:minWidth="0dp" android:text="☆ Favoris"
+            android:textAllCaps="false" android:textSize="12sp"/>
+        <Button android:id="@+id/navSettings" android:layout_width="0dp" android:layout_height="53dp"
+            android:layout_weight="1" android:minWidth="0dp" android:text="⚙ Réglages"
+            android:textAllCaps="false" android:textSize="12sp"/>
     </LinearLayout>
 </LinearLayout>

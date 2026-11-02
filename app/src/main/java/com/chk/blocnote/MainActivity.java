@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -53,13 +55,16 @@ public class MainActivity extends Activity {
     private GridView list;
     private TextView title, breadcrumb, stats;
     private Button filterNotes, filterFav, filterArchive, filterTrash;
+    private Button navHome, navFolders, navFavorites, navSettings;
     private Button btnBackFolder, btnNew, btnFolder, btnMenu;
     private List<NoteDatabase.Item> items = new ArrayList<>();
     private NotesAdapter adapter;
     private SharedPreferences prefs;
     private boolean unlockedSession = false;
     private boolean pinShowing = false;
-    private boolean gridMode = false;
+    private boolean gridMode = true;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private final Runnable delayedReload = this::reload;
     private boolean compactMode = false;
     private String accentColor = Personalization.DEFAULT_COLOR;
 
@@ -72,6 +77,12 @@ public class MainActivity extends Activity {
         db = new NoteDatabase(this);
         bind();
         loadPreferences();
+        if (state != null) {
+            currentFolder = state.getLong("folder", 0L);
+            filter = state.getString("filter", "notes");
+            query = state.getString("query", "");
+            if (!query.isEmpty()) search.setQuery(query, false);
+        }
         reload();
         TestUpdateManager.check(this, false);
     }
@@ -90,9 +101,14 @@ public class MainActivity extends Activity {
         btnNew = findViewById(R.id.btnNew);
         btnFolder = findViewById(R.id.btnFolder);
         btnMenu = findViewById(R.id.btnMenu);
+        navHome = findViewById(R.id.navHome);
+        navFolders = findViewById(R.id.navFolders);
+        navFavorites = findViewById(R.id.navFavorites);
+        navSettings = findViewById(R.id.navSettings);
 
         adapter = new NotesAdapter(this);
         list.setAdapter(adapter);
+        list.setEmptyView(findViewById(R.id.emptyState));
 
         btnNew.setOnClickListener(v -> createNote());
         btnFolder.setOnClickListener(v -> showFolderEditor(null));
@@ -102,17 +118,30 @@ public class MainActivity extends Activity {
         filterFav.setOnClickListener(v -> setFilter("fav"));
         filterArchive.setOnClickListener(v -> setFilter("archive"));
         filterTrash.setOnClickListener(v -> setFilter("trash"));
+        navHome.setOnClickListener(v -> setFilter("notes"));
+        navFolders.setOnClickListener(v -> setFilter("folders"));
+        navFavorites.setOnClickListener(v -> setFilter("fav"));
+        navSettings.setOnClickListener(this::showMainMenu);
 
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override public boolean onQueryTextSubmit(String q) { query = q; reload(); return true; }
-            @Override public boolean onQueryTextChange(String q) { query = q; reload(); return true; }
+            @Override public boolean onQueryTextSubmit(String q) {
+                query = q == null ? "" : q;
+                searchHandler.removeCallbacks(delayedReload);
+                reload(); return true;
+            }
+            @Override public boolean onQueryTextChange(String q) {
+                query = q == null ? "" : q;
+                searchHandler.removeCallbacks(delayedReload);
+                searchHandler.postDelayed(delayedReload, 180);
+                return true;
+            }
         });
 
         list.setOnItemClickListener((parent, view, position, id) -> {
             NoteDatabase.Item item = items.get(position);
             if (item.folder) {
                 currentFolder = item.id;
-                filter = "notes";
+                if (!"folders".equals(filter)) filter = "notes";
                 query = "";
                 search.setQuery("", false);
                 reload();
@@ -128,9 +157,10 @@ public class MainActivity extends Activity {
     }
 
     private void loadPreferences() {
-        gridMode = prefs.getBoolean("grid_mode", false);
+        gridMode = prefs.getBoolean("grid_mode", true);
         compactMode = prefs.getBoolean("compact_mode", false);
         accentColor = Personalization.normalizeHex(prefs.getString("accent_color", Personalization.DEFAULT_COLOR));
+        if ("#6750A4".equalsIgnoreCase(accentColor)) accentColor = Personalization.DEFAULT_COLOR;
         applyDisplayMode();
         applyAccent();
     }
@@ -142,7 +172,12 @@ public class MainActivity extends Activity {
 
     private void reload() {
         if (db == null) return;
-        items = db.listItems(currentFolder, filter, query);
+        if ("folders".equals(filter)) {
+            items = new ArrayList<>();
+            for (NoteDatabase.Item folder : db.getAllFolders()) {
+                if (query.trim().isEmpty() || folder.title.toLowerCase(Locale.ROOT).contains(query.trim().toLowerCase(Locale.ROOT))) items.add(folder);
+            }
+        } else items = db.listItems(currentFolder, filter, query);
         adapter.notifyDataSetChanged();
 
         if ("notes".equals(filter)) {
@@ -163,7 +198,7 @@ public class MainActivity extends Activity {
         int fav = db.countFavorites();
         int trash = db.countTrash();
         stats.setText(total + " notes • " + fav + " favorites • " + trash + " dans la corbeille");
-        btnBackFolder.setEnabled(currentFolder != 0 && "notes".equals(filter));
+        btnBackFolder.setEnabled(currentFolder != 0 && ("notes".equals(filter) || "folders".equals(filter)));
         filterNotes.setAlpha("notes".equals(filter) ? 1f : .52f);
         filterFav.setAlpha("fav".equals(filter) ? 1f : .52f);
         filterArchive.setAlpha("archive".equals(filter) ? 1f : .52f);
@@ -172,6 +207,7 @@ public class MainActivity extends Activity {
     }
 
     private String filterTitle() {
+        if ("folders".equals(filter)) return "▣ Dossiers";
         if ("fav".equals(filter)) return "★ Favoris";
         if ("archive".equals(filter)) return "📦 Archive";
         if ("trash".equals(filter)) return "🗑 Corbeille";
@@ -269,7 +305,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (currentFolder != 0 && "notes".equals(filter)) goParent();
+        if (currentFolder != 0 && ("notes".equals(filter) || "folders".equals(filter))) goParent();
         else if (!"notes".equals(filter) || !query.isEmpty()) {
             filter = "notes";
             query = "";
@@ -429,7 +465,7 @@ public class MainActivity extends Activity {
             else if (id == 108) chooseAppAccent();
             else if (id == 109) chooseTextSize();
             else if (id == 110) TestUpdateManager.check(this, true);
-            else if (id == 105) new AlertDialog.Builder(this).setTitle("Bloc Note Ultra – Version de test")
+            else if (id == 105) new AlertDialog.Builder(this).setTitle("Sync 30 Bloc-note – Version de test")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
             return true;
@@ -471,20 +507,28 @@ public class MainActivity extends Activity {
     private void applyAccent() {
         if (btnNew == null) return;
         int color = Personalization.parseColor(accentColor);
-        ColorStateList tint = ColorStateList.valueOf(color);
         int textColor = readableText(color);
-        btnNew.setBackgroundTintList(tint);
+        btnNew.setBackgroundTintList(ColorStateList.valueOf(color));
         btnNew.setTextColor(textColor);
-        btnFolder.setBackgroundTintList(tint);
-        btnFolder.setTextColor(textColor);
-        filterNotes.setBackgroundTintList(tint);
-        filterFav.setBackgroundTintList(tint);
-        filterArchive.setBackgroundTintList(tint);
-        filterTrash.setBackgroundTintList(tint);
-        filterNotes.setTextColor(textColor);
-        filterFav.setTextColor(textColor);
-        filterArchive.setTextColor(textColor);
-        filterTrash.setTextColor(textColor);
+        btnFolder.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(106, 60, 27)));
+        btnFolder.setTextColor(Color.WHITE);
+        Button[] filters = {filterNotes, filterFav, filterArchive, filterTrash};
+        String[] values = {"notes", "fav", "archive", "trash"};
+        for (int i = 0; i < filters.length; i++) {
+            boolean active = values[i].equals(filter);
+            filters[i].setBackground(Personalization.rounded(this, active ? color : Color.rgb(42, 28, 21),
+                    active ? color : Color.rgb(92, 56, 33), 15));
+            filters[i].setTextColor(active ? textColor : Color.rgb(239, 211, 185));
+        }
+        Button[] nav = {navHome, navFolders, navFavorites, navSettings};
+        String[] navValues = {"notes", "folders", "fav", "settings"};
+        for (int i = 0; i < nav.length; i++) {
+            boolean active = navValues[i].equals(filter);
+            nav[i].setBackground(Personalization.rounded(this,
+                    active ? Color.rgb(79, 43, 20) : Color.rgb(25, 16, 12),
+                    active ? color : Color.rgb(63, 38, 23), 15));
+            nav[i].setTextColor(active ? Color.rgb(255, 181, 79) : Color.rgb(223, 205, 188));
+        }
     }
 
     private int readableText(int color) {
@@ -652,7 +696,16 @@ public class MainActivity extends Activity {
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
 
     @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putLong("folder", currentFolder);
+        state.putString("filter", filter);
+        state.putString("query", query);
+        super.onSaveInstanceState(state);
+    }
+
+    @Override
     protected void onDestroy() {
+        searchHandler.removeCallbacks(delayedReload);
         if (db != null) db.close();
         super.onDestroy();
     }
