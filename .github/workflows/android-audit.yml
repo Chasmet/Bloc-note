@@ -5,6 +5,7 @@ on:
       - "audit/**"
     paths:
       - "app/**"
+      - "gradle.properties"
       - ".github/workflows/android-audit.yml"
   workflow_dispatch:
 permissions:
