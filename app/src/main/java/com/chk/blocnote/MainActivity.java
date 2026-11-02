@@ -109,6 +109,11 @@ public class MainActivity extends Activity {
         adapter = new NotesAdapter(this);
         list.setAdapter(adapter);
         list.setEmptyView(findViewById(R.id.emptyState));
+        if (prefs.getBoolean("light", false)) {
+            findViewById(R.id.mainRoot).setBackgroundColor(Color.rgb(253, 246, 238));
+            search.setBackground(Personalization.rounded(this,
+                    Color.rgb(255, 252, 248), Color.rgb(193, 143, 101), 22));
+        }
 
         btnNew.setOnClickListener(v -> createNote());
         btnFolder.setOnClickListener(v -> showFolderEditor(null));

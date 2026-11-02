@@ -50,6 +50,9 @@ public class EditorActivity extends Activity {
         super.onCreate(state);
         setContentView(R.layout.activity_editor);
         db = new NoteDatabase(this);
+        if (prefs.getBoolean("light", false)) {
+            findViewById(R.id.editorRoot).setBackgroundColor(Color.rgb(253, 246, 238));
+        }
         long id = getIntent().getLongExtra("note_id", -1);
         note = db.getNote(id);
         if (note == null) { finish(); return; }
