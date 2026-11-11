@@ -18,7 +18,7 @@ Ce fichier permet à une autre conversation ou à un agent de reprendre le proje
 1. **Ne pas faire perdre les notes existantes.** Ne pas changer l'ID Android, la signature de test ou le schéma SQLite sans migration vérifiée. Recommander l'export JSON avant toute opération sensible.
 2. **Identité visuelle validée :** noir/marron/cuivre, touches orange/ambre, style proche de Rush Studio, logo carnet spiralé et stylo.
 3. **Stabilité, fluidité et ergonomie** priment sur les fonctions secondaires.
-4. **Monétisation demandée, non implémentée :** trois jours d'accès gratuit puis **paiement unique 1,19 €**, **aucun abonnement**. Play Billing doit valider et restaurer les droits, après tests internes Play.
+4. **Monétisation demandée, non implémentée :** **24 heures d'accès gratuit** puis **paiement unique 1,19 €**, **aucun abonnement**. Play Billing doit valider et restaurer les droits, après tests internes Play.
 
 ## Fonctionnalités existantes
 Notes et sous-dossiers, recherche, favoris, épinglage, archives, corbeille, tags, dictée, couleurs et emojis, thème sombre/clair, liste/grille, taille du texte, code PIN d'interface, autosauvegarde, import/export JSON, notifications de nouvelles APK GitHub en phase de test.
@@ -45,3 +45,12 @@ Notes et sous-dossiers, recherche, favoris, épinglage, archives, corbeille, tag
 Une note épinglée « SUIVI PROJET — Sync 30 Bloc-note — audit, APK et monétisation » contient la version privée de reprise. Elle a été créée le 11/11/2026 dans Notes de CHK Agent Browser. Son déplacement dans le sous-dossier montré par l'utilisateur reste à vérifier.
 
 **À ne pas confondre :** cette fiche et les tests ne signifient pas que l'application est déjà publiée/commercialisée sur Google Play.
+
+## Mise à jour publication Play Store — 11 novembre 2026
+- Décision commerciale mise à jour : **24 heures d'essai**, puis **achat unique de 1,19 €**, pas d'abonnement. La mention antérieure de 3 jours est obsolète.
+- Branche candidate : https://github.com/Chasmet/Bloc-note/tree/feature/play-24h-lifetime-119-20261111
+- Cinq captures réelles sur émulateur Android (1080 × 1920), icône 512 × 512, bannière 1024 × 500, descriptions et checklist préparés.
+- Kit ZIP vérifié : https://github.com/Chasmet/Bloc-note/blob/feature/play-24h-lifetime-119-20261111/play-store/kit-google-play.zip
+- Politique ajoutée au dépôt public du site Sync 30 : https://github.com/Chasmet/sync30/blob/main/politique-confidentialite-blocnote.html ; vérifier son déploiement Render avant Play Console.
+- Candidat Android API 36 avec Play Billing 9.1.0 compilé et testé sur émulateurs. La vérification serveur de licence, la création Play Console, la clé d'upload et les achats Play internes sont ENCORE À FAIRE.
+- IMPORTANT : la branche `main` et les APK installées ne sont PAS encore monétisées. Ne pas publier sans contrôle.
