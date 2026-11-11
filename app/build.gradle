@@ -24,6 +24,15 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        playUpload {
+            def keystore = System.getenv('ANDROID_KEYSTORE_FILE')
+            if (keystore != null && !keystore.isEmpty()) {
+                storeFile file(keystore)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
     }
 
     buildTypes {
@@ -35,6 +44,9 @@ android {
         }
         release {
             minifyEnabled false
+            if (System.getenv('ANDROID_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.playUpload
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
