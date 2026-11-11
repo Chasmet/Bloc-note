@@ -17,7 +17,7 @@
 
         <ImageView android:layout_width="54dp" android:layout_height="54dp"
             android:src="@drawable/ic_note_brand"
-            android:contentDescription="Logo Mes Notes & Dossiers"/>
+            android:contentDescription="Logo Mes Notes &amp; Dossiers"/>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Mes Notes & Dossiers"
+                android:text="Mes Notes &amp; Dossiers"
                 android:textSize="21sp"
                 android:textStyle="bold" />
 
