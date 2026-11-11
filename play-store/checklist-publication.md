@@ -29,3 +29,5 @@ Documentation : https://github.com/Chasmet/Bloc-note/blob/feature/play-24h-lifet
 
 ## Dossier livrable
 L'archive `play-store/kit-google-play.zip` contient cinq vraies captures d'écran sur émulateur, le logo, la bannière, la fiche et la politique de confidentialité. Captures réalisées avec des données fictives, sans notes privées.
+
+La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérifier l'URL en ligne après déploiement Render.
