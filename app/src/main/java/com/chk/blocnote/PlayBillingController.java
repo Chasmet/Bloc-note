@@ -103,8 +103,10 @@ public final class PlayBillingController {
                 try (OutputStream stream = connection.getOutputStream()) { stream.write(data); }
             }
             int status = connection.getResponseCode();
-            if (status != 200) throw new IllegalStateException("Réponse du serveur : " + status);
-            try (InputStream stream = connection.getInputStream()) {
+            if (status != 200 && !(status == 403 && payload != null))
+                throw new IllegalStateException("Réponse du serveur : " + status);
+            try (InputStream stream = status == 403
+                    ? connection.getErrorStream() : connection.getInputStream()) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 byte[] buffer = new byte[4096];
                 int n;
@@ -250,14 +252,15 @@ public final class PlayBillingController {
                 payload.put("productId", PRODUCT_ID);
                 payload.put("purchaseToken", token);
                 JSONObject response = requestJson(new URL(endpoint), payload);
-                verified = response.optBoolean("verified", false)
-                    && PRODUCT_ID.equals(response.optString("productId"))
-                    && "com.chk.blocnote".equals(response.optString("packageName"));
+                if (!PRODUCT_ID.equals(response.optString("productId"))
+                        || !"com.chk.blocnote".equals(response.optString("packageName")))
+                    throw new IllegalStateException("Réponse serveur produit/application incompatible");
+                verified = response.optBoolean("verified", false);
+                explicitlyRejected = !verified; // Refus explicite de CHK, pas un simple problème réseau.
             } catch (Exception ex) {
                 error = ex.getMessage() == null ? "réseau indisponible" : ex.getMessage();
-                // 403 = vérificateur CHK a consulté Google et refuse explicitement l'achat.
-                // 503 / panne réseau = état indéterminé : garder une ancienne licence vérifiée.
-                explicitlyRejected = "Réponse du serveur : 403".equals(error);
+                // 403 d'une passerelle sans réponse structurée = réseau/autorisation,
+                // ne jamais révoquer une licence simplement sur une erreur HTTP.
             }
             final boolean ok = verified;
             final boolean revoked = explicitlyRejected;
