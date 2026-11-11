@@ -87,6 +87,17 @@ public class MainActivity extends Activity {
         }
         reload();
         if (BuildConfig.DEBUG) TestUpdateManager.check(this, false);
+        if (!prefs.getBoolean("trial_terms_seen_v1", false)) {
+            prefs.edit().putBoolean("trial_terms_seen_v1", true).apply();
+            new AlertDialog.Builder(this)
+                .setTitle("Bienvenue dans Mes Notes & Dossiers")
+                .setMessage("Profitez de toutes les fonctions pendant 24 heures dès ce premier lancement. " +
+                    "Ensuite, un achat unique de 1,19 € en France vous permettra de continuer à créer et modifier " +
+                    "vos notes, sans abonnement ni paiement automatique. Le prix final est affiché par Google Play " +
+                    "avant votre confirmation. Vos notes resteront conservées et exportables gratuitement.")
+                .setPositiveButton("Commencer mon essai", (dialog, which) -> {})
+                .show();
+        }
     }
 
     private void bind() {

@@ -55,7 +55,21 @@ jobs:
             https://*/api/v1/play/verify) ;;
             *) echo "::error::URL CHK Paiements HTTPS invalide"; exit 1;;
           esac
-          ./gradlew :app:bundleRelease --stacktrace -PversionCode=23000 -PversionName=2.3.0 \
+          python3 - <<'PY'
+          import json, os, urllib.request
+          endpoint=os.environ["CHK_PAYMENTS_VERIFY_ENDPOINT"]
+          health=endpoint[:-len("verify")]+"health"
+          try:
+              req=urllib.request.Request(health, headers={"Accept":"application/json"})
+              with urllib.request.urlopen(req, timeout=10) as response:
+                  data=json.load(response)
+              if data.get("ok") is not True or data.get("billingReady") is not True:
+                  raise RuntimeError("verificateur non opérationnel")
+          except Exception as error:
+              raise SystemExit("Publication bloquée : CHK Paiements inaccessible ou désactivé")
+          print("CHK Paiements vérifié, préparation du bundle autorisée.")
+          PY
+          ./gradlew :app:bundleRelease --stacktrace -PversionCode=$((24000 + GITHUB_RUN_NUMBER)) -PversionName=2.4.$GITHUB_RUN_NUMBER \
             -PchkPaymentsVerifyEndpoint="$CHK_PAYMENTS_VERIFY_ENDPOINT"
           AAB=app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
