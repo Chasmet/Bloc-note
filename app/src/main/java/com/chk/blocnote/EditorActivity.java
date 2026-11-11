@@ -43,6 +43,28 @@ public class EditorActivity extends Activity {
         @Override public void run() { saveNow(); }
     };
 
+    // Le contrôle périodique évite qu'un éditeur laissé ouvert continue
+    // indéfiniment après les 24 heures gratuites ou une révocation.
+    private final Runnable accessExpiry = new Runnable() {
+        @Override public void run() {
+            if (note == null || isFinishing() || isDestroyed()) return;
+            if (!TrialAccess.hasAccess(EditorActivity.this)) {
+                // Préserver les derniers caractères saisis avant de verrouiller l'édition.
+                saveNow();
+                startActivity(new Intent(EditorActivity.this, PaywallActivity.class));
+                finish();
+                return;
+            }
+            if (!TrialAccess.purchased(EditorActivity.this)) {
+                long remaining = TrialAccess.remaining(EditorActivity.this);
+                handler.postDelayed(this, Math.min(60_000L, Math.max(500L, remaining + 500L)));
+            } else {
+                // Une licence restaurée peut être révoquée depuis MainActivity.
+                handler.postDelayed(this, 60_000L);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle state) {
         prefs = getSharedPreferences("settings", MODE_PRIVATE);
@@ -337,21 +359,20 @@ public class EditorActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (note != null && !TrialAccess.hasAccess(this)) {
-            saveNow();
-            startActivity(new Intent(this, PaywallActivity.class));
-            finish();
-        }
+        handler.removeCallbacks(accessExpiry);
+        accessExpiry.run();
     }
 
     @Override
     protected void onPause() {
+        handler.removeCallbacks(accessExpiry);
         saveNow();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
+        handler.removeCallbacks(accessExpiry);
         handler.removeCallbacks(autosave);
         if (db != null) db.close();
         super.onDestroy();
