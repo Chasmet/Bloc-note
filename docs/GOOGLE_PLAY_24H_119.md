@@ -31,3 +31,13 @@ L'essai gratuit est **géré par l'application** ; Google Play ne facturera pas 
 
 ## Protection de l'installation existante
 Le cache de signature de debug V2 n'a pas été retrouvé en novembre 2026. Le candidat est construit en package DEBUG isolé `com.chk.blocnote.trialtest` et n'est **pas** une mise à jour de l'application installée. Ne pas le substituer à `com.chk.blocnote`. Pour la mise en ligne, le package release est toujours `com.chk.blocnote` et doit être signé avec la vraie clé de production.
+
+## AAB de publication (option manuelle)
+Le workflow `.github/workflows/play-signed-aab.yml` sait produire un AAB signé pour les tests internes uniquement.
+Configurer **sans publier de secret** les 4 variables GitHub Actions Secrets :
+- `BLOCNOTE_UPLOAD_JKS_BASE64` (contenu de la clé d'upload JKS encodée en base64)
+- `BLOCNOTE_UPLOAD_STORE_PASSWORD`
+- `BLOCNOTE_UPLOAD_ALIAS`
+- `BLOCNOTE_UPLOAD_KEY_PASSWORD`
+
+Lancer manuellement le workflow sur la branche de préparation ; sans secrets, il refuse de créer un AAB signé. Ne pas réutiliser une clé de debug. Ne pas diffuser le bundle tant que la validation serveur d'achat, la fiche RGPD et Play Console ne sont pas approuvées.

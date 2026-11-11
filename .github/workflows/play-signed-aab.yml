@@ -1,0 +1,60 @@
+name: Play — AAB signe pour test interne (action manuelle)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Sources
+        uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Installer Android 36
+        run: |
+          SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
+      - name: Restaurer cle d'upload uniquement depuis GitHub Secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BLOCNOTE_UPLOAD_JKS_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
+            echo "::error::Cle d'upload Bloc-note absente des Secrets GitHub. Aucun bundle public ne peut etre cree."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/blocnote-upload.jks"
+          chmod 600 "$RUNNER_TEMP/blocnote-upload.jks"
+          test -s "$RUNNER_TEMP/blocnote-upload.jks"
+      - name: Compiler bundle release signe
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/blocnote-upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
+        run: |
+          gradle wrapper --gradle-version 8.13
+          chmod +x gradlew
+          ./gradlew :app:bundleRelease --stacktrace -PversionCode=23000 -PversionName=2.3.0
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -certs "$AAB"
+          echo "AAB signe produit pour TEST INTERNE. Ne pas distribuer avant validation du Billing et serveur de verification." >> "$GITHUB_STEP_SUMMARY"
+      - name: AAB signe — artefact reserve au depot
+        uses: actions/upload-artifact@v4
+        with:
+          name: blocnote-signed-aab-INTERNAL
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
