@@ -49,6 +49,11 @@ public class EditorActivity extends Activity {
         if (prefs.getBoolean("light", false)) setTheme(R.style.AppTheme_Light);
         super.onCreate(state);
         setContentView(R.layout.activity_editor);
+        if (!TrialAccess.hasAccess(this)) {
+            startActivity(new Intent(this, PaywallActivity.class));
+            finish();
+            return;
+        }
         db = new NoteDatabase(this);
         if (prefs.getBoolean("light", false)) {
             findViewById(R.id.editorRoot).setBackgroundColor(Color.rgb(253, 246, 238));
@@ -327,6 +332,16 @@ public class EditorActivity extends Activity {
             state.putString("draft_tags", tags.getText().toString());
         }
         super.onSaveInstanceState(state);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (note != null && !TrialAccess.hasAccess(this)) {
+            saveNow();
+            startActivity(new Intent(this, PaywallActivity.class));
+            finish();
+        }
     }
 
     @Override

@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
     private NotesAdapter adapter;
     private SharedPreferences prefs;
     private boolean unlockedSession = false;
+    private boolean paywallOpen = false;
     private boolean pinShowing = false;
     private boolean gridMode = true;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
@@ -75,6 +76,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
         db = new NoteDatabase(this);
+        TrialAccess.startIfNeeded(this);
         bind();
         loadPreferences();
         if (state != null) {
@@ -84,7 +86,7 @@ public class MainActivity extends Activity {
             if (!query.isEmpty()) search.setQuery(query, false);
         }
         reload();
-        TestUpdateManager.check(this, false);
+        if (BuildConfig.DEBUG) TestUpdateManager.check(this, false);
     }
 
     private void bind() {
@@ -224,12 +226,23 @@ public class MainActivity extends Activity {
         return "Bloc Note Ultra";
     }
 
+    private boolean checkCommercialAccess() {
+        if (TrialAccess.hasAccess(this)) return true;
+        if (!paywallOpen) {
+            paywallOpen = true;
+            startActivityForResult(new Intent(this, PaywallActivity.class), 504);
+        }
+        return false;
+    }
+
     private void createNote() {
+        if (!checkCommercialAccess()) return;
         long id = db.createNote(currentFolder);
         if (id > 0) openEditor(id);
     }
 
     private void showFolderEditor(NoteDatabase.Item existing) {
+        if (!checkCommercialAccess()) return;
         final String[] selectedColor = {existing == null ? accentColor : existing.color};
         final String[] selectedEmoji = {existing == null ? Personalization.DEFAULT_FOLDER_EMOJI : existing.emoji};
 
@@ -301,6 +314,7 @@ public class MainActivity extends Activity {
     }
 
     private void openEditor(long noteId) {
+        if (!checkCommercialAccess()) return;
         Intent i = new Intent(this, EditorActivity.class);
         i.putExtra("note_id", noteId);
         startActivity(i);
@@ -328,6 +342,14 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (db != null) reload();
+        if (!TrialAccess.hasAccess(this)) {
+            if (!paywallOpen) {
+                paywallOpen = true;
+                startActivityForResult(new Intent(this, PaywallActivity.class), 504);
+            }
+            return;
+        }
+        paywallOpen = false;
         maybeAskPin();
     }
 
@@ -353,6 +375,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean handleItemMenu(NoteDatabase.Item item, MenuItem m) {
+        if (!checkCommercialAccess()) return true;
         int id = m.getItemId();
         if (item.folder) {
             if (id == 1) showFolderEditor(item);
@@ -461,7 +484,8 @@ public class MainActivity extends Activity {
         p.getMenu().add(0, 101, 6, "⬆ Importer sauvegarde JSON");
         p.getMenu().add(0, 102, 7, prefs.getString("pin_hash", "").isEmpty() ? "🔒 Activer verrouillage PIN" : "🔐 Modifier / désactiver le PIN");
         p.getMenu().add(0, 104, 8, "🗑 Vider définitivement la corbeille");
-        p.getMenu().add(0, 110, 9, "↻ Vérifier les mises à jour (test)");
+        p.getMenu().add(0, 111, 9, "🔑 Mon accès : essai 24h / achat unique");
+        if (BuildConfig.DEBUG) p.getMenu().add(0, 110, 10, "↻ Vérifier les mises à jour (test)");
         p.getMenu().add(0, 105, 10, "À propos");
         p.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
@@ -474,7 +498,8 @@ public class MainActivity extends Activity {
             else if (id == 107) toggleCompactMode();
             else if (id == 108) chooseAppAccent();
             else if (id == 109) chooseTextSize();
-            else if (id == 110) TestUpdateManager.check(this, true);
+            else if (id == 110 && BuildConfig.DEBUG) TestUpdateManager.check(this, true);
+            else if (id == 111) startActivity(new Intent(this, PaywallActivity.class).putExtra("preview", true));
             else if (id == 105) new AlertDialog.Builder(this).setTitle("Sync 30 Bloc-note – Version de test")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
@@ -575,6 +600,7 @@ public class MainActivity extends Activity {
     }
 
     private void importBackup() {
+        if (!checkCommercialAccess()) return;
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType("application/json");
@@ -584,6 +610,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 504) {
+            paywallOpen = false;
+            if (!TrialAccess.hasAccess(this)) checkCommercialAccess();
+            return;
+        }
         if (resultCode != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
         if (requestCode == REQ_EXPORT) {
