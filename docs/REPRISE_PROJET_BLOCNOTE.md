@@ -54,3 +54,19 @@ Une note épinglée « SUIVI PROJET — Sync 30 Bloc-note — audit, APK et mon�
 - Politique ajoutée au dépôt public du site Sync 30 : https://github.com/Chasmet/sync30/blob/main/politique-confidentialite-blocnote.html ; vérifier son déploiement Render avant Play Console.
 - Candidat Android API 36 avec Play Billing 9.1.0 compilé et testé sur émulateurs. La vérification serveur de licence, la création Play Console, la clé d'upload et les achats Play internes sont ENCORE À FAIRE.
 - IMPORTANT : la branche `main` et les APK installées ne sont PAS encore monétisées. Ne pas publier sans contrôle.
+
+## Nouvelles images importées dans CHK Browser Local 3 — 11 novembre 2026
+
+- Vérification effective via le serveur CHK : le dossier `Categories/Images/application bloc note` contient **10 fichiers**.
+- **5 JPEG d'origine** de l'application installée (170525, 170538, 170608, 170622, 170639) : captures réelles, plusieurs montrant un écran vide ou des menus. Certaines dimensions dépassent le ratio 2:1 imposé par Google Play.
+- **5 PNG supplémentaires** créés comme maquettes graphiques puis ajoutés par l'utilisateur :
+  - `file_000000009c408246b67fa96132e9d647.png` : accueil.
+  - `file_00000000b9248210b7b61cfdb112dff5.png` : dossiers.
+  - `file_0000000081908246b4afed4ac76812a0.png` : favoris.
+  - `file_00000000999081f4a33f5357b83daeef.png` : éditeur.
+  - `file_0000000025d88212a7dcf54d23795c7f.png` : réglages.
+- **Attention : les PNG sont des maquettes générées par IA**, pas des captures de fonctionnalités démontrées. Ne pas les téléverser comme captures officielles sans audit des fonctions représentées. Certaines maquettes montrent des pièces jointes, rappels ou outils de texte enrichi non vérifiés dans le produit.
+- Les **5 captures authentiques obtenues sur émulateur** au format 1080×1920 restent dans la branche candidate : `play-store/screenshots/`. Kit ZIP déjà généré : `play-store/kit-google-play.zip`.
+- État de publication : la création de la fiche Bloc-note dans Play Console, le prix du produit, la vérification sécurisée du paiement, les tests en console et l'AAB signé restent **non confirmés / à faire**. Offre cible : **24 h gratuites puis paiement unique 1,19 €**, sans abonnement.
+- Les deux notes privées du dossier CHK sont actualisées : fiche complète (révision 5) et résumé de 1 000 caractères (révision 6).
+- Dossier de référence : `Images → application bloc note` dans CHK Browser Local 3. Les images importées ne sont pas automatiquement des fichiers du dépôt GitHub.
