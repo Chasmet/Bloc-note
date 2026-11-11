@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
     private SharedPreferences prefs;
     private boolean unlockedSession = false;
     private boolean paywallOpen = false;
+    private PlayBillingController entitlementController;
     private boolean pinShowing = false;
     private boolean gridMode = true;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
@@ -86,6 +87,19 @@ public class MainActivity extends Activity {
             if (!query.isEmpty()) search.setQuery(query, false);
         }
         reload();
+        // Revérifier les achats à chaque lancement, même si une licence était en cache.
+        // Un remboursement ou une révocation confirmé par Google enlève l'accès Premium.
+        entitlementController = new PlayBillingController(this, new PlayBillingController.Listener() {
+            @Override public void onBillingStatus(String message, boolean canPurchase, String price) {
+                if (!TrialAccess.hasAccess(MainActivity.this) && !paywallOpen
+                        && !isFinishing() && !isDestroyed()) checkCommercialAccess();
+            }
+            @Override public void onAccessRestored() {
+                // Le contrôleur principal n'ouvre jamais de fenêtre d'achat.
+                // La licence vérifiée permet de retrouver les notes normalement.
+            }
+        });
+        entitlementController.connect();
         if (BuildConfig.DEBUG) TestUpdateManager.check(this, false);
         if (!prefs.getBoolean("trial_terms_seen_v1", false)) {
             prefs.edit().putBoolean("trial_terms_seen_v1", true).apply();
@@ -760,6 +774,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         searchHandler.removeCallbacks(delayedReload);
+        if (entitlementController != null) entitlementController.close();
         if (db != null) db.close();
         super.onDestroy();
     }
