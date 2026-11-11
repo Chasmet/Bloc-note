@@ -41,3 +41,10 @@ Configurer **sans publier de secret** les 4 variables GitHub Actions Secrets :
 - `BLOCNOTE_UPLOAD_KEY_PASSWORD`
 
 Lancer manuellement le workflow sur la branche de préparation ; sans secrets, il refuse de créer un AAB signé. Ne pas réutiliser une clé de debug. Ne pas diffuser le bundle tant que la validation serveur d'achat, la fiche RGPD et Play Console ne sont pas approuvées.
+
+## Audit paiements 11/11/2026
+- Nouveau contrôleur Android : achat `PURCHASED` sur le téléphone **ne suffit plus** ; vérification HTTPS CHK Paiements obligatoire, puis restauration et accusé de réception Play.
+- URL de vérification utilisée : `https://<passerelle-publique-dediee>/api/v1/play/verify`; vérification pré-achat : `/api/v1/play/health` répond `{ok:true,billingReady:true}`.
+- La configuration de l'URL passe uniquement par Gradle `-PchkPaymentsVerifyEndpoint` ; la CI de l'AAB signé exige le secret `BLOCNOTE_CHK_PAYMENTS_VERIFY_URL`. Pas de secret Google Play dans l'APK.
+- L'infrastructure CHK Paiements connue est **privée Tailscale et en mode prototype** : elle n'est pas accessible aux clients Google Play sans passerelle HTTPS publique dédiée. Ne pas utiliser l'URL MCP universelle ni exposer le port local 8791.
+- Ne pas publier tant que CHK Paiements n'a pas un vérificateur Google réellement opérationnel, les droits Google Play Developer API et les tests achats/restauration/remboursements passés.

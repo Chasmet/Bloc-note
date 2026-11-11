@@ -43,10 +43,20 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
+          CHK_PAYMENTS_VERIFY_ENDPOINT: ${{ secrets.BLOCNOTE_CHK_PAYMENTS_VERIFY_URL }}
         run: |
           gradle wrapper --gradle-version 8.13
           chmod +x gradlew
-          ./gradlew :app:bundleRelease --stacktrace -PversionCode=23000 -PversionName=2.3.0
+          if [ -z "$CHK_PAYMENTS_VERIFY_ENDPOINT" ]; then
+            echo "::error::BLOCNOTE_CHK_PAYMENTS_VERIFY_URL manquant, paiement inaccessible. Publication bloquee."
+            exit 1
+          fi
+          case "$CHK_PAYMENTS_VERIFY_ENDPOINT" in
+            https://*/api/v1/play/verify) ;;
+            *) echo "::error::URL CHK Paiements HTTPS invalide"; exit 1;;
+          esac
+          ./gradlew :app:bundleRelease --stacktrace -PversionCode=23000 -PversionName=2.3.0 \
+            -PchkPaymentsVerifyEndpoint="$CHK_PAYMENTS_VERIFY_ENDPOINT"
           AAB=app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
           jarsigner -verify -certs "$AAB"
