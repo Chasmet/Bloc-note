@@ -12,7 +12,8 @@
 - [ ] Application Sync 30 Bloc-note créée avec package com.chk.blocnote (ne pas créer de doublon)
 - [ ] Description courte / longue et fiche FR enregistrées
 - [ ] Icône 512×512, bannière 1024×500, au moins 4 captures réelles 1080×1920
-- [ ] Politique de confidentialité sur URL HTML publique active + lien **dans l'application**
+- [x] Politique de confidentialité publiée dans le dépôt du site et lien ajouté **dans l'application** (URL à vérifier sur Render)
+- [ ] Vérifier que https://sync30.onrender.com/politique-confidentialite-blocnote.html répond bien avec la dernière version
 - [ ] Fiche « Sécurité des données » vérifiée selon code final (Billing, système, éventuel backend)
 - [ ] Type « application », catégorie Productivité, public cible et questionnaire de classification
 - [ ] Déclaration publicité conforme (pas de SDK pub dans code vérifié)

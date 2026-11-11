@@ -56,3 +56,6 @@ Captures réelles: play-store/screenshots/ (résolution visée 1080x1920).
 
 ## Déclarations à confirmer dans Play Console
 Classification du contenu, public cible, sécurité des données, politique de confidentialité, présence d'achats intégrés, accès des examinateurs. Ne pas déclarer une monétisation prête avant tests effectifs dans la console.
+
+## Politique de confidentialité dédiée
+https://sync30.onrender.com/politique-confidentialite-blocnote.html

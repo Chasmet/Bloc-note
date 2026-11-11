@@ -80,6 +80,9 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
             Button back = button(stack, "Retour aux notes");
             back.setOnClickListener(v -> finish());
         }
+        Button privacy = button(stack, "Politique de confidentialité");
+        privacy.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://sync30.onrender.com/politique-confidentialite-blocnote.html"))));
         billingState = text("Connexion Google Play…", 13, Color.rgb(206, 167, 130));
         stack.addView(billingState);
         stack.addView(text("Montant définitif et moyen de paiement affichés par Google Play avant confirmation.", 12, Color.rgb(171, 141, 120)));

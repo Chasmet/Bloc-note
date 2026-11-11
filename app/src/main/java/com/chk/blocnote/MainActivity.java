@@ -486,7 +486,8 @@ public class MainActivity extends Activity {
         p.getMenu().add(0, 104, 8, "🗑 Vider définitivement la corbeille");
         p.getMenu().add(0, 111, 9, "🔑 Mon accès : essai 24h / achat unique");
         if (BuildConfig.DEBUG) p.getMenu().add(0, 110, 10, "↻ Vérifier les mises à jour (test)");
-        p.getMenu().add(0, 105, 10, "À propos");
+        p.getMenu().add(0, 112, 11, "Politique de confidentialité");
+        p.getMenu().add(0, 105, 12, "À propos");
         p.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == 100) exportBackup();
@@ -500,6 +501,7 @@ public class MainActivity extends Activity {
             else if (id == 109) chooseTextSize();
             else if (id == 110 && BuildConfig.DEBUG) TestUpdateManager.check(this, true);
             else if (id == 111) startActivity(new Intent(this, PaywallActivity.class).putExtra("preview", true));
+            else if (id == 112) startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://sync30.onrender.com/politique-confidentialite-blocnote.html")));
             else if (id == 105) new AlertDialog.Builder(this).setTitle("Sync 30 Bloc-note – Version de test")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
