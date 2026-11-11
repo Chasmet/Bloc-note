@@ -49,7 +49,7 @@
 - [x] Code Android imposant vérification CHK et prix catalogue Play
 - [x] Code vérificateur Google Play côté sidecar CHK Paiements **en branche isolée**
 - [x] Tests Node côté CHK (simulations, sans vrais achats)
-- [ ] Compilation Android API 36 et tests instrumentés sur la dernière version **à confirmer après les correctifs**
+- [x] Compilation Android API 36 réussie : GitHub Actions run 43092831817 ; APK de test isolée + AAB non signé ; tests instrumentés Android API 29/36 réussis : run 43092831868
 - [ ] CHK Paiements déployé avec compte Google Play autorisé, HTTPS public dédié
 - [ ] Fiche Google Play + produit activé à 1,19 €
 - [ ] AAB signé par la clé officielle de Bloc-note
@@ -61,3 +61,9 @@
 - Android : https://github.com/Chasmet/Bloc-note/tree/feature/play-24h-lifetime-119-20261111
 - CHK Paiements : https://github.com/Chasmet/CHK-serveur-Universal-Control/tree/feature/paiements-sync30/payments
 - Google : https://developer.android.com/google/play/billing/lifecycle/one-time
+
+## Résultats CI vérifiés après correction XML
+- [Play candidate — build terminé avec succès](https://github.com/Chasmet/Bloc-note/actions/runs/43092831817) ; artefact interne `blocnote-play-candidate-24h-19`, pas une release signée.
+- [Android 10 / 16 — tests instrumentés réussis](https://github.com/Chasmet/Bloc-note/actions/runs/43092831868).
+- [CHK Paiements — CI Node réussie](https://github.com/Chasmet/CHK-serveur-Universal-Control/actions/runs/43092707980), dont nouveaux tests du vérificateur et du journal des paiements.
+- Aucun achat de test Google Play côté utilisateur n'a encore été exécuté ; la preuve de transaction réelle reste obligatoire.
