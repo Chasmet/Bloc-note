@@ -55,6 +55,7 @@ jobs:
           script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --stacktrace
       - name: Rapports de tests Android
         if: always()
+        continue-on-error: true # GitHub artifacts service failure must not mask Android tests result
         uses: actions/upload-artifact@v4
         with:
           name: essai-24h-tests-api-${{ matrix.api }}
