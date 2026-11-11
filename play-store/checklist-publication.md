@@ -1,4 +1,4 @@
-# Play Console — vérifications de publication (Sync 30 Bloc-note)
+# Play Console — vérifications de publication (Mes Notes & Dossiers)
 
 ## Fait dans le dépôt de préparation
 - [x] Offre définie : 24 h de test, puis achat unique de 1,19 € (non automatique)
@@ -9,7 +9,7 @@
 - [ ] Signature de publication AAB sécurisée et testée
 
 ## À renseigner dans Play Console
-- [ ] Application Sync 30 Bloc-note créée avec package com.chk.blocnote (ne pas créer de doublon)
+- [ ] Application Mes Notes & Dossiers créée avec package com.chk.blocnote (ne pas créer de doublon)
 - [ ] Description courte / longue et fiche FR enregistrées
 - [ ] Icône 512×512, bannière 1024×500, au moins 4 captures réelles 1080×1920
 - [x] Politique de confidentialité publiée dans le dépôt du site et lien ajouté **dans l'application** (URL à vérifier sur Render)

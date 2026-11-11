@@ -64,7 +64,7 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
         int pad = (int) (24 * getResources().getDisplayMetrics().density);
         stack.setPadding(pad, pad, pad, pad);
         scroller.addView(stack);
-        stack.addView(text("Sync 30 Bloc-note", 27, Color.rgb(255, 196, 116)));
+        stack.addView(text("Mes Notes & Dossiers", 27, Color.rgb(255, 196, 116)));
         stack.addView(text("24 heures gratuites, puis accès à vie", 21, Color.WHITE));
         description = text("", 17, Color.rgb(234, 203, 179));
         stack.addView(description);

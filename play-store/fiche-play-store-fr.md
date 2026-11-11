@@ -1,14 +1,14 @@
-# FICHE GOOGLE PLAY — Sync 30 Bloc-note
+# FICHE GOOGLE PLAY — Mes Notes & Dossiers
 Langue : français (France). État : brouillon pour Play Console, édition le 11 novembre 2026.
 
 ## Nom (maximum 30 caractères)
-Sync 30 Bloc-note
+Mes Notes & Dossiers
 
 ## Description courte (maximum 80 caractères)
 Notes, dossiers et favoris. 24 h d'essai puis achat unique à 1,19 €.
 
 ## Description complète
-Organisez vos idées, vos listes et vos projets avec Sync 30 Bloc-note, une application de notes Android simple, pratique et personnalisable.
+Organisez vos idées, vos listes et vos projets avec Mes Notes & Dossiers, une application de notes Android simple, pratique et personnalisable.
 
 Rassemblez tout au même endroit, avec une interface élégante aux couleurs noir, marron et cuivre.
 
