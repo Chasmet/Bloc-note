@@ -1,0 +1,35 @@
+name: Google Play - Icone et banniere
+on:
+  push:
+    branches: [feature/play-24h-lifetime-119-20261111]
+    paths:
+      - tools/play_assets.py
+      - .github/workflows/play-assets.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  brand-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "Pillow>=10,<13"
+      - run: python tools/play_assets.py
+      - name: Publier sur branche de préparation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add play-store/assets/
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(play): icone 512 et banniere 1024x500 issues du logo existant"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sync30-blocnote-assets-googleplay
+          path: play-store/assets/
+          if-no-files-found: error
+          retention-days: 90
