@@ -28,3 +28,6 @@ Statut : **candidat en développement**, ne pas pousser sur main avant configura
 
 ## Informations importantes
 L'essai gratuit est **géré par l'application** ; Google Play ne facturera pas automatiquement après 24h. L'utilisateur déclenche personnellement l'achat. Aucun prélèvement périodique.
+
+## Protection de l'installation existante
+Le cache de signature de debug V2 n'a pas été retrouvé en novembre 2026. Le candidat est construit en package DEBUG isolé `com.chk.blocnote.trialtest` et n'est **pas** une mise à jour de l'application installée. Ne pas le substituer à `com.chk.blocnote`. Pour la mise en ligne, le package release est toujours `com.chk.blocnote` et doit être signé avec la vraie clé de production.

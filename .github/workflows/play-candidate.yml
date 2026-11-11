@@ -36,8 +36,18 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: bloc-note-ultra-stable-signing-v2
-      - name: Exiger ancienne cle pour ne pas casser les maj sur le telephone
-        run: test -s "$HOME/.android/debug.keystore"
+      - name: Cle debug isolee pour application de test (ID .trialtest)
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -s "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -alias androiddebugkey -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -keyalg RSA -keysize 2048 -validity 10000
+          fi
+          echo "L'APK debug a un identifiant different (.trialtest) et ne remplace pas l'application existante." >> "$GITHUB_STEP_SUMMARY"
       - name: Configurer Gradle wrapper
         run: gradle wrapper --gradle-version 8.13
       - name: Construire APK de test et bundle NON SIGNE (non publiable)
