@@ -1,0 +1,84 @@
+name: Google Play - Captures reelles Android
+on:
+  push:
+    branches: [feature/play-24h-lifetime-119-20261111]
+    paths:
+      - "app/src/androidTest/java/com/chk/blocnote/StoreScreenshotInstrumentedTest.java"
+      - ".github/workflows/play-store-screenshots.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Android API 36
+        shell: bash
+        run: |
+          SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
+      - name: Debug signing for isolated emulator app
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -s "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          fi
+      - name: Gradle wrapper
+        run: gradle wrapper --gradle-version 8.13
+      - name: KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Lancer l'application et capturer les vrais ecrans
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            adb shell wm size 1080x1920
+            adb shell wm density 420
+            chmod +x gradlew
+            ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell am instrument -w -e class com.chk.blocnote.StoreScreenshotInstrumentedTest com.chk.blocnote.trialtest.test/androidx.test.runner.AndroidJUnitRunner
+            mkdir -p play-store/screenshots
+            adb pull /sdcard/Android/data/com.chk.blocnote.trialtest/files/Pictures/play-store/ play-store/screenshots/
+            test $(find play-store/screenshots -name '*.png' | wc -l) -ge 5
+            file play-store/screenshots/*.png
+      - name: Archive des captures reelles
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync30-blocnote-captures-reelles-1080x1920
+          path: play-store/screenshots/**/*.png
+          if-no-files-found: error
+          retention-days: 90
+      - name: Publier les captures de demonstration sur la branche de preparation
+        shell: bash
+        run: |
+          if [ -d play-store/screenshots/play-store ]; then
+            mv play-store/screenshots/play-store/*.png play-store/screenshots/
+            rmdir play-store/screenshots/play-store
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add play-store/screenshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(play): cinq vraies captures Android 1080x1920 avec donnees de demonstration"
+            git push
+          fi
