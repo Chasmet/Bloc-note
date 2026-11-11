@@ -204,7 +204,8 @@ public final class PlayBillingController {
             if (!foundPurchased) {
                 // Succès de queryPurchasesAsync : achat absent = licence révoquée ou jamais acquise.
                 TrialAccess.updatePurchase(activity, false);
-                if (manual) report("Aucun achat définitif trouvé sur ce compte Play.");
+                report(manual ? "Aucun achat définitif trouvé sur ce compte Play." :
+                    "Statut des licences Google Play actualisé.");
             }
         });
     }
@@ -241,6 +242,7 @@ public final class PlayBillingController {
         if (!verifying.add(token)) return;
         new Thread(() -> {
             boolean verified = false;
+            boolean explicitlyRejected = false;
             String error = "";
             try {
                 JSONObject payload = new JSONObject();
@@ -253,13 +255,18 @@ public final class PlayBillingController {
                     && "com.chk.blocnote".equals(response.optString("packageName"));
             } catch (Exception ex) {
                 error = ex.getMessage() == null ? "réseau indisponible" : ex.getMessage();
+                // 403 = vérificateur CHK a consulté Google et refuse explicitement l'achat.
+                // 503 / panne réseau = état indéterminé : garder une ancienne licence vérifiée.
+                explicitlyRejected = "Réponse du serveur : 403".equals(error);
             }
             final boolean ok = verified;
+            final boolean revoked = explicitlyRejected;
             final String fail = error;
             main.post(() -> {
                 verifying.remove(token);
                 if (closed) return;
                 if (!ok) {
+                    if (revoked) TrialAccess.updatePurchase(activity, false);
                     report("Achat non encore validé par CHK Paiements"
                         + (fail.isEmpty() ? "." : " : " + fail));
                     return;
