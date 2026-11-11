@@ -1,0 +1,44 @@
+name: Google Play - Dossier complet telechargeable
+on:
+  push:
+    branches: [feature/play-24h-lifetime-119-20261111]
+    paths:
+      - play-store/screenshots/**
+      - play-store/assets/**
+      - play-store/fiche-play-store-fr.md
+      - play-store/checklist-publication.md
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verifier les 5 captures et les 2 visuels
+        run: |
+          test -f play-store/assets/sync30-blocnote-icon-512.png
+          test -f play-store/assets/sync30-blocnote-feature-1024x500.jpg
+          test $(find play-store/screenshots -maxdepth 1 -name '*.png' | wc -l) -ge 5
+          file play-store/assets/* play-store/screenshots/*.png
+      - name: Preparer l'archive pour Play Console
+        run: |
+          cp docs/politique-confidentialite-blocnote.html play-store/politique-confidentialite-blocnote.html
+          cd play-store
+          zip -q -r kit-google-play.zip assets screenshots fiche-play-store-fr.md checklist-publication.md politique-confidentialite-blocnote.html
+          unzip -l kit-google-play.zip | tail -4
+      - name: Sauvegarder archive sur la branche de preparation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add play-store/kit-google-play.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(play): kit complet telechargeable pour Play Console"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Sync30-Blocnote-Dossier-Play-Store
+          path: play-store/kit-google-play.zip
+          if-no-files-found: error
+          retention-days: 90
