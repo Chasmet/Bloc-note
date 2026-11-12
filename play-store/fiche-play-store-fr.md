@@ -1,5 +1,5 @@
 # FICHE GOOGLE PLAY — Mes Notes & Dossiers
-Langue : français (France). État : brouillon pour Play Console, édition le 11 novembre 2026.
+Langue : français (France). État : brouillon prêt à saisir, NON publié ; édition le 12 novembre 2026. Application créée en Console (ID 4976373584470422373), package PUBLIC `com.sync30.mesnotesdossiers` à confirmer dans la Console.
 
 ## Nom (maximum 30 caractères)
 Mes Notes & Dossiers
