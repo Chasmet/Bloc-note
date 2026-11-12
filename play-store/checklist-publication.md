@@ -16,7 +16,7 @@
 - [ ] URL de confidentialité enregistrée dans Play Console, MAIS le site Render affiche encore la version HTML du 11/11 au lieu du texte GitHub actualisé décrivant CHK Paiements. Déployer la version à jour et revérifier le contenu HTTPS public.
 - [ ] Fiche « Sécurité des données » vérifiée selon code final (Billing, système, éventuel backend)
 - [ ] Type « application » confirmé à la création ; catégorie Productivité, public cible et questionnaire de classification à finaliser
-- [x] Déclaration Publicités : « Non, l'application ne contient pas de publicités » enregistrée dans Play Console (12/11/2026, code sans SDK publicitaire vérifié)
+- [x] Déclaration Publicités : « Non, l'application ne contient pas de publicités » enregistrée dans Play Console ET confirmée après rechargement (12/11/2026, code sans SDK publicitaire vérifié)
 - [ ] Produit non consommable Google Play `blocnote_premium_lifetime`, prix français 1,19 €, activé
 - [ ] Vérification serveur achat / remboursement sécurisée avant vente réelle
 - [ ] Comptes de testeurs internes et vérifications de commandes Pay/annulation/restauration
@@ -34,11 +34,14 @@ La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérif
 
 ## Progression Play Console du 12 novembre 2026
 - [x] App créée, identifiant interne `4976373584470422373`, téléchargement gratuit « Free ».
-- [x] Politique de confidentialité enregistrée dans le formulaire Play Console : `https://sync30.onrender.com/politique-confidentialite-blocnote.html` (contenu public à actualiser par déploiement Render).
-- [x] Déclaration gouvernement : « Non » enregistrée, l'application est proposée par une entreprise privée.
+- [ ] Politique de confidentialité : URL saisie puis Save cliqué dans Play Console, mais après deux contrôles par rechargement le champ est VIDE. Enregistrement NON confirmé, à résoudre avant publication. URL envisagée : `https://sync30.onrender.com/politique-confidentialite-blocnote.html`.
+- [x] Déclaration gouvernement : « Non » enregistrée ET confirmée après rechargement, l'application est proposée par une entreprise privée.
 - [ ] Déclaration accès examinateurs : **BLOQUANT**. Google indique explicitement ne pas pouvoir utiliser l'essai gratuit ni acheter pour examiner les sections payantes. La déclaration doit indiquer « Oui, accès restreint » et fournir un vrai mécanisme d'accès de démonstration sécurisé (à développer/tester) avant envoi.
 - [ ] Déclaration de fonctionnalités financières/health, classification d'âge, sécurité des données et publicité ID Android à compléter après examen du code final. Un achat intégré ordinaire ne transforme pas l'app de notes en service bancaire.
 - [ ] Compte marchand / statut de professionnel « Declare your trader status » : validation nécessaire du titulaire en Play Console.
 - [ ] Pack d'images (logo 512, bannière 1024x500 et 5 captures 1080x1920) est en GitHub, pas encore chargé dans Play Console.
 - [ ] AAB public release signé, compte de service CHK Paiements, passerelle HTTPS, test achat/restauration/remboursement non validés ; AUCUNE vente ni publication.
 - [ ] Vérifier le package public fixé `com.sync30.mesnotesdossiers` dans Play Console et dans l'AAB accepté.
+
+### Correction de vérification, même jour
+Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde distante. Pour la politique de confidentialité, la valeur saisie **disparaît après rechargement** (deux essais). Ne PAS affirmer la section terminée. Les déclarations Publicités/Non gouvernementale ont, elles, été relues et confirmées persistantes.
