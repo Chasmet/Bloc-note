@@ -3,13 +3,13 @@
 ## Fait dans le dépôt de préparation
 - [x] Offre définie : 24 h de test, puis achat unique de 1,19 € (non automatique)
 - [x] Code Google Play Billing (pas encore vérifié avec achat réel en Play Console)
-- [x] Build Android ciblant API 36 (branche candidate)
+- [x] Build Android API 36 et tests émulateurs Android 10/16 sur la branche publique : GitHub Actions 43170718093 et 43170718066 = SUCCESS
 - [x] Dossier fiche Play Store français, politique de confidentialité brouillon
-- [ ] Icône, bannière et captures : confirmer génération par GitHub Actions puis contrôles visuels
+- [x] Icône 512x512, bannière 1024x500 et cinq captures 1080x1920 préparées dans le dépôt ; NON encore importées dans Play Console
 - [ ] Signature de publication AAB sécurisée et testée
 
 ## À renseigner dans Play Console
-- [ ] Application Mes Notes & Dossiers créée avec package com.chk.blocnote (ne pas créer de doublon)
+- [x] Application « Mes Notes & Dossiers » créée dans Play Console le 12/11/2026, identifiant interne 4976373584470422373 ; package PUBLIC prévu : com.sync30.mesnotesdossiers (à confirmer par la Console ou le premier AAB accepté)
 - [ ] Description courte / longue et fiche FR enregistrées
 - [ ] Icône 512×512, bannière 1024×500, au moins 4 captures réelles 1080×1920
 - [x] Politique de confidentialité publiée dans le dépôt du site et lien ajouté **dans l'application** (URL à vérifier sur Render)
@@ -30,4 +30,4 @@ Documentation : https://github.com/Chasmet/Bloc-note/blob/feature/play-24h-lifet
 ## Dossier livrable
 L'archive `play-store/kit-google-play.zip` contient cinq vraies captures d'écran sur émulateur, le logo, la bannière, la fiche et la politique de confidentialité. Captures réalisées avec des données fictives, sans notes privées.
 
-La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérifier l'URL en ligne après déploiement Render.
+La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérifier l'URL en ligne après déploiement Render et l'aligner avec le package public et le backend de facturation.
