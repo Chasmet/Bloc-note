@@ -13,7 +13,7 @@
 - [ ] Description courte / longue et fiche FR enregistrées
 - [ ] Icône 512×512, bannière 1024×500, au moins 4 captures réelles 1080×1920
 - [x] Politique de confidentialité publiée dans le dépôt du site et lien ajouté **dans l'application** (URL à vérifier sur Render)
-- [ ] URL de confidentialité enregistrée dans Play Console, MAIS le site Render affiche encore la version HTML du 11/11 au lieu du texte GitHub actualisé décrivant CHK Paiements. Déployer la version à jour et revérifier le contenu HTTPS public.
+- [x] Site public Sync 30 actualisé le 12/11/2026 : Render `sync30` (site statique exclusivement) a déployé le commit `ae956f0c8e83fe6461e609017e0bd0f61b34f10f` (deployment `dep-dbqqcb5bedkc73ee53k0`, statut `live`). Lecture de la politique en ligne confirme le texte CHK Paiements ; ne pas confondre avec l'enregistrement URL dans Play Console.
 - [ ] Fiche « Sécurité des données » vérifiée selon code final (Billing, système, éventuel backend)
 - [ ] Type « application » confirmé à la création ; catégorie Productivité, public cible et questionnaire de classification à finaliser
 - [x] Déclaration Publicités : « Non, l'application ne contient pas de publicités » enregistrée dans Play Console ET confirmée après rechargement (12/11/2026, code sans SDK publicitaire vérifié)
@@ -45,3 +45,10 @@ La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérif
 
 ### Correction de vérification, même jour
 Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde distante. Pour la politique de confidentialité, la valeur saisie **disparaît après rechargement** (deux essais). Ne PAS affirmer la section terminée. Les déclarations Publicités/Non gouvernementale ont, elles, été relues et confirmées persistantes.
+
+### Contrôle d'indépendance Render — confirmé le 12/11/2026
+- Le propriétaire **autorise Render My Workspace uniquement pour le site statique** et exige que Mes Notes & Dossiers ne dépende pas de Render pour fonctionner.
+- Application : notes/SQLite locales, sauvegardes locales et essai local ; le code Billing utilise Google Play + un vérificateur HTTPS CHK Paiements distinct du site Render.
+- Vérification du dépôt : Gradle lit `chkPaymentsVerifyEndpoint` au build sans URL Render imposée. Aucun nouveau serveur Render pour l'application ; ne pas pointer Billing vers Render sans autorisation nouvelle.
+- Les achats et restaurations nécessitent les services en ligne Google Play + CHK Paiements : ce n'est pas une dépendance Render. Les notes doivent rester consultables même sans Render (tester offline avant release).
+- Page publique de confidentialité hébergée sur Render uniquement comme document du site éditeur, et mise à jour/vérifiée. Elle ne fait pas partie du moteur applicatif Android.
