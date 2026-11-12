@@ -34,7 +34,7 @@ La politique HTML du kit correspond au texte du dépôt du site Sync 30 ; vérif
 
 ## Progression Play Console du 12 novembre 2026
 - [x] App créée, identifiant interne `4976373584470422373`, téléchargement gratuit « Free ».
-- [ ] Politique de confidentialité : URL saisie puis Save cliqué dans Play Console, mais après deux contrôles par rechargement le champ est VIDE. Enregistrement NON confirmé, à résoudre avant publication. URL envisagée : `https://sync30.onrender.com/politique-confidentialite-blocnote.html`.
+- [x] Politique de confidentialité : Google Play Dashboard marque désormais l'étape comme TERMINÉE le 12/11 (3/11 tâches validées). URL : `https://sync30.onrender.com/politique-confidentialite-blocnote.html`.
 - [x] Déclaration gouvernement : « Non » enregistrée ET confirmée après rechargement, l'application est proposée par une entreprise privée.
 - [ ] Déclaration accès examinateurs : **BLOQUANT**. Google indique explicitement ne pas pouvoir utiliser l'essai gratuit ni acheter pour examiner les sections payantes. La déclaration doit indiquer « Oui, accès restreint » et fournir un vrai mécanisme d'accès de démonstration sécurisé (à développer/tester) avant envoi.
 - [ ] Déclaration de fonctionnalités financières/health, classification d'âge, sécurité des données et publicité ID Android à compléter après examen du code final. Un achat intégré ordinaire ne transforme pas l'app de notes en service bancaire.
@@ -59,9 +59,9 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
   - `sync30-blocnote-feature-1024x500.jpg` (1024×500),
   - `sync30-play-01-accueil-notes.png` à `sync30-play-05-editeur.png` (captures issues de la branche GitHub ; première vérifiée 1080×1920).
 - [ ] **IMPORT GOOGLE PLAY NON CONFIRMÉ** : le bouton « Add assets » est visible mais le formulaire ne fournit pas de champ HTML file actif pour le connecteur CHK. Une tentative d'upload a renvoyé `unconfirmed` / « champ fichier absent ». Ne pas annoncer que les images sont dans Play Console.
-- [ ] Description FR courte (68 caractères) et longue (1 704 caractères) saisies, mais le brouillon est revenu VIDE après rechargement. Aucun enregistrement distant confirmé. Les visuels obligatoires manquants provoquent « Some languages have errors ».
+- [x] Description FR courte (68 caractères) et longue (1 704 caractères) réellement présentes après rechargement, vérifiées le 12/11. Les visuels restent à importer et la fiche n'est pas terminée.
 - [x] GitHub Actions candidat public du 12/11 : https://github.com/Chasmet/Bloc-note/actions/runs/43211756184 : SUCCESS. Cela ne prouve pas un AAB release signé.
-- [ ] Google Play Dashboard indique **2/11 tâches complétées** (publicités Non, gouvernement Non). Politique de confidentialité saisie précédemment mais vide après rechargement.
+- [x] Google Play Dashboard indique **3/11 tâches complétées** : publicités Non, gouvernement Non, politique de confidentialité validée.
 - [ ] La publication nécessite encore : fiches persistées, photos réellement importées, déclarations réglementaires, validation du compte professionnel, clé d'upload, AAB RELEASE SIGNÉ, backend CHK Paiements HTTPS opérationnel et test d'achat/restauration.
 - [ ] Le serveur CHK Paiements existant est sur PC Windows, hors Render ; l'app ne doit pas dépendre de Render. Ne pas lancer de vente si le PC/serveur n'est pas publiquement disponible et vérifié.
 
@@ -74,3 +74,10 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [ ] **Visuels non importés** : 7 fichiers locaux CHK sont valides et vérifiés (logo, bannière, 5 captures) ; mais Play Console n'expose pas de champ HTML `input[type=file]` exploitable dans le navigateur CHK autonome. Un clic sur « Add assets » n'a pas confirmé de sélection ou d'envoi. Ne pas affirmer que les captures figurent dans la fiche.
 - [ ] Catégorie Productivité, coordonnées de contact et autres formulaires à terminer ; ne pas certifier une déclaration dont les choix n'ont pas été validés.
 - [ ] Vente réelle bloquée tant que signature, vérificateur HTTPS CHK Paiements, compte Play Billing et achats de test ne sont pas vérifiés. Aucun déploiement en production ni AAB interne Google Play.
+
+### Nouvelle vérification du 12/11 à 13 h locale (reprise)
+- [x] Après nouvelle saisie et rechargement, descriptions courte et complète **persistantes** sur la page Store listings.
+- [x] Dashboard Google Play : politique de confidentialité cochée ; total 3/11 tâches.
+- [ ] Workflow AAB signé lancé par le push GitHub le 12/11, **ÉCHEC** à l'étape « Restaurer cle d'upload uniquement depuis GitHub Secrets », AVANT compilation du release : https://github.com/Chasmet/Bloc-note/actions/runs/43223516271 . Il manque au moins une partie des informations JKS upload ; ne pas utiliser la clé debug.
+- [x] Script PowerShell préparé, sans valeurs secrètes, sauvegardé dans le dépôt et dans CHK-Workspace/CHK-Paiements-GooglePlay/windows/prepare-upload-key.ps1. Ne pas dire exécuté. Il utilise le JDK keytool et gh CLI en mode interactif, demande un support distinct pour sauvegarde et envoie les secrets par stdin sans les afficher.
+- [ ] Exécuter et tester le script SUR LE PC avec le compte propriétaire, vérifier SHA-256 et sauvegarde externe, puis seulement relancer le AAB signé.
