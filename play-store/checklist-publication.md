@@ -52,3 +52,15 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - Vérification du dépôt : Gradle lit `chkPaymentsVerifyEndpoint` au build sans URL Render imposée. Aucun nouveau serveur Render pour l'application ; ne pas pointer Billing vers Render sans autorisation nouvelle.
 - Les achats et restaurations nécessitent les services en ligne Google Play + CHK Paiements : ce n'est pas une dépendance Render. Les notes doivent rester consultables même sans Render (tester offline avant release).
 - Page publique de confidentialité hébergée sur Render uniquement comme document du site éditeur, et mise à jour/vérifiée. Elle ne fait pas partie du moteur applicatif Android.
+
+### Reprise autonome du 12/11/2026 — Play listing, médias, CI
+- [x] 7 visuels téléchargés via CHK Browser Local 3 dans `Categories/Images/application bloc note/`, téléchargement complet + SHA-256 vérifié pour chacun :
+  - `sync30-blocnote-icon-512.png` (512×512),
+  - `sync30-blocnote-feature-1024x500.jpg` (1024×500),
+  - `sync30-play-01-accueil-notes.png` à `sync30-play-05-editeur.png` (captures issues de la branche GitHub ; première vérifiée 1080×1920).
+- [ ] **IMPORT GOOGLE PLAY NON CONFIRMÉ** : le bouton « Add assets » est visible mais le formulaire ne fournit pas de champ HTML file actif pour le connecteur CHK. Une tentative d'upload a renvoyé `unconfirmed` / « champ fichier absent ». Ne pas annoncer que les images sont dans Play Console.
+- [ ] Description FR courte (68 caractères) et longue (1 704 caractères) saisies, mais le brouillon est revenu VIDE après rechargement. Aucun enregistrement distant confirmé. Les visuels obligatoires manquants provoquent « Some languages have errors ».
+- [x] GitHub Actions candidat public du 12/11 : https://github.com/Chasmet/Bloc-note/actions/runs/43211756184 : SUCCESS. Cela ne prouve pas un AAB release signé.
+- [ ] Google Play Dashboard indique **2/11 tâches complétées** (publicités Non, gouvernement Non). Politique de confidentialité saisie précédemment mais vide après rechargement.
+- [ ] La publication nécessite encore : fiches persistées, photos réellement importées, déclarations réglementaires, validation du compte professionnel, clé d'upload, AAB RELEASE SIGNÉ, backend CHK Paiements HTTPS opérationnel et test d'achat/restauration.
+- [ ] Le serveur CHK Paiements existant est sur PC Windows, hors Render ; l'app ne doit pas dépendre de Render. Ne pas lancer de vente si le PC/serveur n'est pas publiquement disponible et vérifié.
