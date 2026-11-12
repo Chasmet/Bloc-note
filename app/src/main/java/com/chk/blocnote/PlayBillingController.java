@@ -248,12 +248,12 @@ public final class PlayBillingController {
             String error = "";
             try {
                 JSONObject payload = new JSONObject();
-                payload.put("packageName", "com.chk.blocnote");
+                payload.put("packageName", activity.getPackageName());
                 payload.put("productId", PRODUCT_ID);
                 payload.put("purchaseToken", token);
                 JSONObject response = requestJson(new URL(endpoint), payload);
                 if (!PRODUCT_ID.equals(response.optString("productId"))
-                        || !"com.chk.blocnote".equals(response.optString("packageName")))
+                        || !activity.getPackageName().equals(response.optString("packageName")))
                     throw new IllegalStateException("Réponse serveur produit/application incompatible");
                 verified = response.optBoolean("verified", false);
                 explicitlyRejected = !verified; // Refus explicite de CHK, pas un simple problème réseau.
