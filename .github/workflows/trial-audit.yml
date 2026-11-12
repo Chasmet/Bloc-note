@@ -1,7 +1,7 @@
 name: Audit essai 24h — emulation Android 10 et 16
 on:
   push:
-    branches: [feature/play-24h-lifetime-119-20261111]
+    branches: [feature/play-24h-lifetime-119-20261111, feature/play-sync30-mesnotesdossiers-20261112]
     paths:
       - "app/**"
       - "build.gradle"
