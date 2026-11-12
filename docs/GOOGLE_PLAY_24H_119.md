@@ -10,7 +10,7 @@ Statut : **candidat en développement**, ne pas pousser sur main avant configura
 - Licence restaurable depuis Google Play grâce à `queryPurchasesAsync`; achat en attente ne donne aucun accès.
 
 ## Avant toute vente (bloquants)
-1. Créer l'application `com.chk.blocnote` dans Play Console (compte Organisation « Sync 30 Numérique »).
+1. Application CRÉÉE dans Play Console le 12/11/2026 (ID interne `4976373584470422373`). Package public choisi `com.sync30.mesnotesdossiers` ; vérifier le package enregistré en Console. Conserver l'APK personnelle séparée `com.chk.blocnote`.
 2. Configurer et activer un produit intégré **non consommable** `blocnote_premium_lifetime` à 1,19 € (France), puis tester avec les comptes de test de licence.
 3. **Vérification serveur indispensable** avant commercialisation : transmettre le `purchaseToken` au backend HTTPS partagé, vérifier Google Play Developer API, suivre remboursement et annulation, gérer notifications RTDN. Le client seul n'est pas une preuve résistante aux fraudes.
 4. Essai local actuel : durée 24h en SharedPreferences avec horloge monotone, **réinitialisable via réinstallation/effacement des données** et non synchronisé entre appareils. Pour une limitation par compte Google, implémenter la date du premier usage sur un backend sécurisé avec authentification minimale, politique RGPD.
@@ -23,14 +23,14 @@ Statut : **candidat en développement**, ne pas pousser sur main avant configura
 - AGP 8.13, Gradle 8.13, Java 17.
 - Essai et paywall : `TrialAccess.java`, `PaywallActivity.java`.
 - Achat Google Play : `PlayBillingController.java`.
-- Conserver `applicationId com.chk.blocnote`, base SQLite `bloc_note_ultra.db` et identifiant des notes. Sauvegarde avant toute migration.
-- Branche : `feature/play-24h-lifetime-119-20261111`. La version publique sur `main` reste sans monétisation jusqu'à validation.
+- VERSION PERSONNELLE : conserver `com.chk.blocnote` et sa base locale intactes. VERSION PUBLIQUE Google Play : utiliser `applicationId com.sync30.mesnotesdossiers`, le même schéma de données interne (`bloc_note_ultra.db`) dans son propre stockage Android isolé. Les deux applications coexistent.
+- Branche candidate historique : `feature/play-24h-lifetime-119-20261111`. NOUVELLE BRANCHE PUBLIQUE : `feature/play-sync30-mesnotesdossiers-20261112` (build et audit émulateurs réussis). La branche `main` reste inchangée jusqu'à validation.
 
 ## Informations importantes
 L'essai gratuit est **géré par l'application** ; Google Play ne facturera pas automatiquement après 24h. L'utilisateur déclenche personnellement l'achat. Aucun prélèvement périodique.
 
 ## Protection de l'installation existante
-Le cache de signature de debug V2 n'a pas été retrouvé en novembre 2026. Le candidat est construit en package DEBUG isolé `com.chk.blocnote.trialtest` et n'est **pas** une mise à jour de l'application installée. Ne pas le substituer à `com.chk.blocnote`. Pour la mise en ligne, le package release est toujours `com.chk.blocnote` et doit être signé avec la vraie clé de production.
+Le cache de signature de debug V2 n'a pas été retrouvé en novembre 2026. Le candidat est construit en package DEBUG isolé `com.chk.blocnote.trialtest` et n'est **pas** une mise à jour de l'application installée. Ne pas le substituer à `com.chk.blocnote`. Pour la mise en ligne, le package release PUBLIC est `com.sync30.mesnotesdossiers` et doit être signé avec sa clé de production. L'APK personnelle `com.chk.blocnote` n'est pas remplacée.
 
 ## AAB de publication (option manuelle)
 Le workflow `.github/workflows/play-signed-aab.yml` sait produire un AAB signé pour les tests internes uniquement.
