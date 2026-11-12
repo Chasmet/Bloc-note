@@ -1,6 +1,12 @@
-name: Play — AAB signe pour test interne (action manuelle)
+name: Play — AAB signe pour test interne (jamais publication automatique)
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/play-sync30-mesnotesdossiers-20261112
+    paths:
+      - '.github/workflows/play-signed-aab.yml'
+      - 'app/**'
 permissions:
   contents: read
 jobs:
