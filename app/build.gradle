@@ -13,7 +13,7 @@ android {
     compileSdk 36
 
     defaultConfig {
-        applicationId 'com.chk.blocnote'
+        applicationId 'com.sync30.mesnotesdossiers'
         manifestPlaceholders = [appLabel: 'Mes Notes & Dossiers']
         minSdk 23
         targetSdk 36
