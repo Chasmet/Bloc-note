@@ -113,3 +113,12 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [ ] Description courte SEO saisie dans Play Console, mais Save as draft reste sur « Submitting… ». Relecture après rechargement EFFECTUÉE : l'ancienne description courte « Notes, dossiers et favoris. 24 h d'essai puis achat unique à 1,19 €. » réapparaît. La proposition SEO n'est PAS enregistrée ; il faut résoudre la soumission avant la fiche Play.
 - [x] Notes CHK de reprise et résumé actualisés ; aucune clé ni mot de passe transmis.
 - [ ] Toujours bloqués : catégorie/contacts, images, déclarations, accès examinateur sécurisé, clé JKS, CHK Paiements HTTPS+Google Play Developer API, produit Play, achats de test et soumission.
+
+
+### Nouvelle clé d'upload créée et archivée sur Android — 13/11/2026
+- [x] **Clé JKS d'upload créée et testée** pour le futur package public `com.sync30.mesnotesdossiers` ; certificat SHA-256 `95:4C:04:AC:6F:3A:66:66:E0:69:1B:17:95:CB:15:6C:D9:7C:9D:F9:2F:B0:0A:AD:29:AC:0B:AE:1F:02:2C:EB` ; alias `sync30_mesnotes_upload`.
+- [x] Copie **vérifiée** dans le stockage privé CHK Android : `Sync30/Signatures/MesNotesDossiers/sync30_mesnotes_upload.jks` (4012 octets, SHA-256 de fichier `0c224b9615e77a99f455072c1e98e2811c324c6cc1c853240859f0bd1e525c79`). Le certificat public PEM est également présent dans ce dossier.
+- [x] Fiche de reprise et empreintes non sensibles créées dans CHK Notes et dans [UPLOAD_KEY_SYNC30_MESNOTES_20261113.md](./UPLOAD_KEY_SYNC30_MESNOTES_20261113.md).
+- [ ] **Sauvegarde chiffrée indépendante du téléphone non encore confirmée** ; identifiants secrets remis au propriétaire dans un fichier de transfert confidentiel distinct, à placer dans un gestionnaire de mots de passe chiffré (JAMAIS dans Notes ou GitHub public).
+- [ ] Secrets GitHub non configurés ; AAB release avec cette nouvelle clé non signé et Google Play App Signing non encore associé à ce certificat. Les précédents échecs CI pour absence de clé datent d'avant cette création ; les Secrets restent à renseigner avant retest.
+- [ ] CHK Paiements HTTPS et produit Play Billing non confirmés : NE PAS soumettre à la production.
