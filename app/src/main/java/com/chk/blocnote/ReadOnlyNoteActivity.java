@@ -62,7 +62,7 @@ public final class ReadOnlyNoteActivity extends Activity {
         TextView body = label(note.body == null ? "" : note.body, 17f, TEXT);
         body.setGravity(Gravity.TOP);
         LinearLayout.LayoutParams bodyParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         column.addView(body, bodyParams);
 
         Button premium = new Button(this);
