@@ -75,7 +75,7 @@ jobs:
               raise SystemExit("Publication bloquée : CHK Paiements inaccessible ou désactivé")
           print("CHK Paiements vérifié, préparation du bundle autorisée.")
           PY
-          ./gradlew :app:bundleRelease --stacktrace -PversionCode=$((24000 + GITHUB_RUN_NUMBER)) -PversionName=2.4.$GITHUB_RUN_NUMBER \
+          ./gradlew :app:bundleRelease --stacktrace -PversionCode=$((50000 + GITHUB_RUN_NUMBER)) -PversionName=2.6.$GITHUB_RUN_NUMBER \
             -PchkPaymentsVerifyEndpoint="$CHK_PAYMENTS_VERIFY_ENDPOINT"
           AAB=app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
