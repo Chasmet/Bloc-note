@@ -81,3 +81,13 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [ ] Workflow AAB signé lancé par le push GitHub le 12/11, **ÉCHEC** à l'étape « Restaurer cle d'upload uniquement depuis GitHub Secrets », AVANT compilation du release : https://github.com/Chasmet/Bloc-note/actions/runs/43223516271 . Il manque au moins une partie des informations JKS upload ; ne pas utiliser la clé debug.
 - [x] Script PowerShell préparé, sans valeurs secrètes, sauvegardé dans le dépôt et dans CHK-Workspace/CHK-Paiements-GooglePlay/windows/prepare-upload-key.ps1. Ne pas dire exécuté. Il utilise le JDK keytool et gh CLI en mode interactif, demande un support distinct pour sauvegarde et envoie les secrets par stdin sans les afficher.
 - [ ] Exécuter et tester le script SUR LE PC avec le compte propriétaire, vérifier SHA-256 et sauvegarde externe, puis seulement relancer le AAB signé.
+
+### Contrôle final du 13 novembre 2026
+- [x] Identité publique dans le code corrigée : `MainActivity` n'affiche plus « Bloc Note Ultra » ni « Version de test » ; ressource `app_name` devient « Mes Notes & Dossiers ». Les commits sont `9e8d8f21` et `dc54502c` sur la seule branche publique ; APK personnelle intacte.
+- [x] Compilation candidate du code final : SUCCESS https://github.com/Chasmet/Bloc-note/actions/runs/43361926027 ; audit Android 10/16 : SUCCESS https://github.com/Chasmet/Bloc-note/actions/runs/43361926137.
+- [ ] AAB RELEASE signé : FAILED https://github.com/Chasmet/Bloc-note/actions/runs/43361926117. Étape en échec : restauration clé d'upload depuis GitHub Secrets. Pas de fichier JKS public confirmé ni AAB uploadable ; ne pas réutiliser une clé debug.
+- [ ] Formulaire Santé : option de non-fonctionnalités sélectionnée une fois, mais passage étape 2 bloqué sur « Loading… » ; après rechargement, formulaire non sauvegardé. NON VALIDÉ.
+- [ ] Formulaire accès des examinateurs : « Yes » sélectionné temporairement car paiement restreint certaines fonctions. L'interface « Add details » n'a pas ouvert ses champs ; aucune instruction d'accès enregistrée. Un mécanisme de revue sécurisé et réellement testable doit être fourni avant soumission.
+- [ ] Catégorie, contacts, sécurité des données, finances, public cible, IARC, visuels et statut professionnel toujours à vérifier/terminer dans Play Console.
+- [x] Fiche technique des déclarations créée : [declarations-play-console-fr.md](./declarations-play-console-fr.md). Ce document est préparatoire et n'est pas une déclaration effectuée.
+- [ ] Essai de 24h actuel local : effacer les données peut redémarrer l'essai ; cette limite est documentée et nécessite une décision produit pour l'application commerciale (ne pas prétendre une protection côté compte Google).
