@@ -248,7 +248,7 @@ public class MainActivity extends Activity {
         if ("fav".equals(filter)) return "★ Favoris";
         if ("archive".equals(filter)) return "📦 Archive";
         if ("trash".equals(filter)) return "🗑 Corbeille";
-        return "Bloc Note Ultra";
+        return "Mes Notes & Dossiers";
     }
 
     private boolean checkCommercialAccess() {
@@ -527,7 +527,7 @@ public class MainActivity extends Activity {
             else if (id == 110 && BuildConfig.DEBUG) TestUpdateManager.check(this, true);
             else if (id == 111) startActivity(new Intent(this, PaywallActivity.class).putExtra("preview", true));
             else if (id == 112) startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://sync30.onrender.com/politique-confidentialite-blocnote.html")));
-            else if (id == 105) new AlertDialog.Builder(this).setTitle("Sync 30 Bloc-note – Version de test")
+            else if (id == 105) new AlertDialog.Builder(this).setTitle("Mes Notes & Dossiers — Sync 30 Numérique")
                     .setMessage("Bloc-notes Android natif ultra personnalisable.\n\n• couleurs par dossier et note\n• emojis personnalisés\n• mode liste / grille\n• mode compact\n• couleur principale de l'app\n• taille du texte\n• SQLite local\n• autosauvegarde\n• favoris, archive, corbeille, tags et dictée\n• export/import JSON\n\nLes données restent sur l'appareil sauf partage ou export volontaire.")
                     .setPositiveButton("OK", null).show();
             return true;
