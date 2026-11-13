@@ -5,7 +5,7 @@ Langue : français (France). État : brouillon prêt à saisir, NON publié ; é
 Mes Notes & Dossiers
 
 ## Description courte (maximum 80 caractères)
-Notes, dossiers et favoris. 24 h d'essai puis achat unique à 1,19 €.
+Prenez des notes et organisez vos dossiers et vos favoris simplement
 
 ## Description complète
 Organisez vos idées, vos listes et vos projets avec Mes Notes & Dossiers, une application de notes Android simple, pratique et personnalisable.
