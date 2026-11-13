@@ -55,7 +55,10 @@ public class EditorActivity extends Activity {
                 finish();
                 return;
             }
-            if (!TrialAccess.purchased(EditorActivity.this)) {
+            if (ReviewerAccess.isActive(EditorActivity.this)) {
+                long remaining = ReviewerAccess.remaining(EditorActivity.this);
+                handler.postDelayed(this, Math.min(60_000L, Math.max(500L, remaining + 500L)));
+            } else if (!TrialAccess.purchased(EditorActivity.this)) {
                 long remaining = TrialAccess.remaining(EditorActivity.this);
                 handler.postDelayed(this, Math.min(60_000L, Math.max(500L, remaining + 500L)));
             } else {
