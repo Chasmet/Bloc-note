@@ -1,3 +1,18 @@
+## REPRISE CONSOLE — 13 NOVEMBRE 2026, SOIR (POST-IMPORT)
+
+Ce bloc est le **dernier contrôle effectif** et prévaut sur les anciennes cases historiques du fichier.
+
+- [x] **Fiche Play enregistrée et relue sur Android via CHK Browser Local 3** : l'interface affiche **App icon 1/1**, **Feature graphic 1/1**, **Phone screenshots 4/8**. Le message « Your changes have been saved » est présent. La cinquième capture, préparée en local, n'est pas encore importée ou vérifiée dans Play.
+- [x] **Titre et textes FR visibles à l'étape Review** : « Mes Notes & Dossiers », description courte « Prenez des notes et organisez vos dossiers et vos favoris simplement », description longue enregistrée.
+- [x] **Catégorie Productivité** : enregistrée et retrouvée lors du contrôle CHK du 13/11 vers 20h55 (voir note maître CHK).
+- [ ] **Déclaration IA des visuels** : l'option « Label assets as created or edited using AI » est sélectionnée dans Review. Dans la fenêtre « Label AI-generated assets », la bannière apparaît sélectionnée sur la capture du propriétaire. **Validation « Label assets and submit » NON confirmée** par CHK ; les captures d'écran réelles ne doivent pas être étiquetées IA à tort. Vérifier le logo puis finaliser la déclaration.
+- [ ] **Accès Play Console** : nouveau clic de validation et création d'onglet non confirmés par CHK en arrière-plan, ce qui ne constitue PAS une sauvegarde ni une soumission.
+- [ ] **Contacts Store settings, déclarations App access / accès examinateur, santé, finance, âge, IARC, Data safety, trader** : toujours à relire et enregistrer séparément.
+- [ ] **Paiements / production** : CHK Paiements HTTPS, cinquième secret et achat/restauration/remboursement Google Play non validés ; AAB commercial non déposé ; aucune publication. **Ne pas activer de ventes.**
+- [ ] **APK personnelle** `com.chk.blocnote` inchangée ; branche publique seule à modifier.
+
+---
+
 ## KIT VISUELS — 7/7 PRÉPARÉS DANS CHK (13/11/2026)
 
 Fichiers **copiés et vérifiés par SHA-256** dans le dossier privé CHK Android
