@@ -91,3 +91,10 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [ ] Catégorie, contacts, sécurité des données, finances, public cible, IARC, visuels et statut professionnel toujours à vérifier/terminer dans Play Console.
 - [x] Fiche technique des déclarations créée : [declarations-play-console-fr.md](./declarations-play-console-fr.md). Ce document est préparatoire et n'est pas une déclaration effectuée.
 - [ ] Essai de 24h actuel local : effacer les données peut redémarrer l'essai ; cette limite est documentée et nécessite une décision produit pour l'application commerciale (ne pas prétendre une protection côté compte Google).
+
+### Audit direct du bundle Android non signé — 13/11/2026
+- [x] Artefact CI téléchargé depuis `43361926027` (GitHub artifact `blocnote-play-candidate-24h-43`, ID 14008358419). Archive contenant `apk/debug/app-debug.apk` et `bundle/release/app-release.aab`.
+- [x] Inspection du manifeste dans le module `base` de l'AAB : identifiant `com.sync30.mesnotesdossiers`, titre `Mes Notes & Dossiers`, permissions `android.permission.INTERNET` et `com.android.vending.BILLING` détectés.
+- [x] Vérification locale par `jarsigner -verify -verbose` : réponse exacte **`jar is unsigned.`**. Aucun certificat/signature JAR dans `META-INF`. Ce fichier est un bundle candidat non signé, **NON ACCEPTABLE pour dépôt comme release Play**.
+- [ ] Clé JKS upload publique à créer/retrouver en coffre sécurisé et sauvegarder ; renseigner les quatre GitHub Secrets JKS/mots de passe/alias. Conserver le certificat SHA-256 public. Ne jamais rendre le JKS ou mot de passe public.
+- [ ] Publier une version AAB release signée et vérifier `jarsigner`, package, versionCode et certificat AVANT import test interne.
