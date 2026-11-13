@@ -42,3 +42,13 @@
 2. Ne pas toucher à la version personnelle déjà installée, à Rush Studio ni à d'autres projets.
 3. Ne pas confondre compilation de code, AAB signé, dépôt test interne, soumission à Google et publication effective.
 4. Toute déclaration « FAIT » exige relecture de son état persistant dans Play Console.
+
+
+## Accès examinateur — développement ajouté le 13/11/2026
+
+- [x] Code Android public (branche Play seulement) : bouton **« Accès examinateur Google Play »** dans l'écran « Mon accès : essai 24h / achat unique » accessible depuis le menu. Cette fonction n'est pas limitée à la fin de l'essai.
+- [x] `ReviewerAccess` compare uniquement le **SHA-256 du code** (long code aléatoire privé). Il autorise temporairement l'éditeur et la création pendant 72 heures ; il **ne crée pas une licence achetée**, n'appelle pas Billing, ne modifie pas `TrialAccess.updatePurchase` et n'affecte pas l'application personnelle.
+- [x] Le vrai code secret est stocké **uniquement dans la note CHK privée épinglée** : « CONFIDENTIEL — Code examinateur Google Play Mes Notes & Dossiers ». **Ne jamais copier le code, ses valeurs ou un lien vers cette note dans GitHub public.**
+- [ ] Vérifier la compilation et tester réellement sur Android : code incorrect refusé, code valide accepté, accès à la création/édition sans achat, expiration à 72 h, aucune élévation de licence Billing.
+- [ ] Enregistrer dans le formulaire **App access** privé de Google Play : restriction = oui, chemin Menu → Mon accès : essai 24h / achat unique → Accès examinateur Google Play, et coller le code depuis CHK privé. L'accès n'est pas un abonnement ni une vente.
+- [ ] Recharger Play Console et confirmer les instructions sauvegardées. Le simple développement Android **ne valide pas** la déclaration officielle.
