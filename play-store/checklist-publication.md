@@ -98,3 +98,8 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [x] Vérification locale par `jarsigner -verify -verbose` : réponse exacte **`jar is unsigned.`**. Aucun certificat/signature JAR dans `META-INF`. Ce fichier est un bundle candidat non signé, **NON ACCEPTABLE pour dépôt comme release Play**.
 - [ ] Clé JKS upload publique à créer/retrouver en coffre sécurisé et sauvegarder ; renseigner les quatre GitHub Secrets JKS/mots de passe/alias. Conserver le certificat SHA-256 public. Ne jamais rendre le JKS ou mot de passe public.
 - [ ] Publier une version AAB release signée et vérifier `jarsigner`, package, versionCode et certificat AVANT import test interne.
+
+### Note Play Console — tentative de correction de la description courte
+- La Console avertit « Should not contain special characters » pour le texte initial contenant notamment le symbole monétaire `€`.
+- Texte SEO sobre retenu et enregistré **dans GitHub seulement** : « Prenez des notes et organisez vos dossiers et vos favoris simplement » (68 caractères), fichier `fiche-play-store-fr.md`, commit `b17a6aa1`.
+- Tentative de saisie dans Play Console : valeur visible dans le formulaire, puis bouton « Save as draft » resté sur `Submitting…` ; après nouvelle navigation, l'ancien texte reste dans le champ. **Nouvelle description NON persistée**, ne pas la déclarer validée.
