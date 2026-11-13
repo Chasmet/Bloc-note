@@ -47,9 +47,10 @@ public final class TrialAccess {
     static void updatePurchase(Context c, boolean valid) {
         p(c).edit().putBoolean("premium", valid).commit();
     }
-    public static boolean hasAccess(Context c) { return purchased(c) || remaining(c) > 0L; }
+    public static boolean hasAccess(Context c) { return purchased(c) || ReviewerAccess.isActive(c) || remaining(c) > 0L; }
     public static String status(Context c) {
         if (purchased(c)) return "Licence définitive active";
+        if (ReviewerAccess.isActive(c)) return "Accès examinateur Google Play temporaire";
         long remaining = remaining(c);
         if (remaining == 0) return "Essai gratuit terminé";
         long minutes = (remaining + 59999L) / 60000L;
