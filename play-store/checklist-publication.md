@@ -103,3 +103,13 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - La Console avertit « Should not contain special characters » pour le texte initial contenant notamment le symbole monétaire `€`.
 - Texte SEO sobre retenu et enregistré **dans GitHub seulement** : « Prenez des notes et organisez vos dossiers et vos favoris simplement » (68 caractères), fichier `fiche-play-store-fr.md`, commit `b17a6aa1`.
 - Tentative de saisie dans Play Console : valeur visible dans le formulaire, puis bouton « Save as draft » resté sur `Submitting…` ; après nouvelle navigation, l'ancien texte reste dans le champ. **Nouvelle description NON persistée**, ne pas la déclarer validée.
+
+
+### Intervention vérifiée du 13/11/2026 — lecture hors ligne et reprise CHK
+- [x] Sur la branche publique UNIQUEMENT, les notes existantes restent consultables en **lecture seule** après les 24 heures d'essai : `ReadOnlyNoteActivity` + contrôle d'accès conservé pour la création/modification. Commit final `c6d024f58e9d4162c9c8e79056f241da0c7e21f8`. Package personnel et données `com.chk.blocnote` inchangés.
+- [x] CI candidate après correctif : **SUCCESS**, https://github.com/Chasmet/Bloc-note/actions/runs/43369224569 ; émulateurs Android 10/16 : **SUCCESS**, https://github.com/Chasmet/Bloc-note/actions/runs/43369224739. L'achat réel, la révocation et le mode hors ligne sur téléphone restent à tester.
+- [ ] Signature AAB de ce code : workflow https://github.com/Chasmet/Bloc-note/actions/runs/43369224667 **FAILED** par absence de secrets JKS ; aucun AAB release signé, aucune piste interne.
+- [ ] Assets Play Console : dossier CHK `Categories/Images/application bloc note` contient actuellement la bannière et captures PNG 01–03. Le logo et les captures 04–05 ont été retrouvés dans les **Téléchargements** CHK, pas dans ce dossier. L'import Files via Local 3 échoue avec « Choisis un fichier ou dossier ». **Ne pas confondre disponibilité en Téléchargements et upload Play validé.**
+- [ ] Description courte SEO saisie dans Play Console, mais Save as draft reste sur « Submitting… ». Relecture après rechargement encore nécessaire ; aucun changement considéré persistant.
+- [x] Notes CHK de reprise et résumé actualisés ; aucune clé ni mot de passe transmis.
+- [ ] Toujours bloqués : catégorie/contacts, images, déclarations, accès examinateur sécurisé, clé JKS, CHK Paiements HTTPS+Google Play Developer API, produit Play, achats de test et soumission.
