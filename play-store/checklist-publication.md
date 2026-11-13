@@ -1,3 +1,23 @@
+## ÉTAT ACTUEL PRIORITAIRE — 13 novembre 2026, après correctifs examinateur
+
+**Les anciennes cases de la liste ci-dessous décrivent l'historique. CE BILAN prévaut :**
+
+- [x] Clé JKS d'upload vérifiée (SHA-256 certificat `95:4C:04:AC:6F:3A:66:66:E0:69:1B:17:95:CB:15:6C:D9:7C:9D:F9:2F:B0:0A:AD:29:AC:0B:AE:1F:02:2C:EB`), copies privées CHK Android contrôlées.
+- [x] 4 **GitHub Actions Secrets** de signature renseignés et relus : `BLOCNOTE_UPLOAD_JKS_BASE64`, `BLOCNOTE_UPLOAD_STORE_PASSWORD`, `BLOCNOTE_UPLOAD_ALIAS`, `BLOCNOTE_UPLOAD_KEY_PASSWORD`. AUCUNE VALEUR de secret publiée dans le dépôt.
+- [x] **AAB release signé pour tests internes** au commit code `3108ae00566622082cf1eff6ec1827a36b985847` : [run 43485466135](https://github.com/Chasmet/Bloc-note/actions/runs/43485466135) SUCCESS, artifact `14067930210`, expiration **20 novembre 2026**. Aucun paiement n'est activé sans endpoint CHK. Bundle NON déposé dans Google Play.
+- [x] **AAB QA signé** sans ventes : [run 43485466361](https://github.com/Chasmet/Bloc-note/actions/runs/43485466361) SUCCESS, artifact `14067965145`.
+- [x] **Android 10/16 + tests ReviewerAccess** : [run 43485466177](https://github.com/Chasmet/Bloc-note/actions/runs/43485466177) SUCCESS. Validation positive par code sur appareil encore à faire.
+- [x] **Accès examinateur développé** : bouton dans `PaywallActivity`, code long dont seul le SHA-256 figure dans `ReviewerAccess`, accès 72 h et aucune fausse licence `purchased`. Code en clair UNIQUEMENT dans la note privée CHK « CONFIDENTIEL — Code examinateur Google Play Mes Notes & Dossiers ». Ne jamais placer ce code ici.
+- [ ] **App access Play Console** : renseigner « certaines parties restreintes » et les étapes Menu → Mon accès : essai 24h / achat unique → Accès examinateur Google Play ; coller le code depuis la note privée CHK. Confirmer la persistance de l'enregistrement.
+- [ ] **Store settings** : page relue le 13/11 ; catégorie **Not selected**. Enregistrer Productivité, e-mail professionnel, site et vérifier après rechargement. Le contrôle CHK du clic Edit était non confirmé lorsque le navigateur restait en arrière-plan.
+- [ ] **Assets** : importer depuis le kit GitHub les 7 vrais visuels. Pas d'upload Play confirmé. L'icône et captures 04/05 ne sont pas encore vérifiées dans le dossier Images principal CHK ; une nouvelle tentative d'import automatique n'a pas confirmé leur présence.
+- [ ] **5e secret** `BLOCNOTE_CHK_PAYMENTS_VERIFY_URL` : ABSENT en attente de passerelle CHK Paiements HTTPS publiquement opérationnelle + Google Play Developer API (health ok/billingReady). Ancienne adresse Tailscale non accessible depuis un contrôle externe : état du serveur non concluant. Ne pas mettre Render en backend.
+- [ ] **Autres déclarations Play** : santé, finances, IARC, public cible, Data safety (allowBackup + purchaseToken), AD_ID manifeste fusionné, statut professionnel/trader, identité Organisation. À valider et relire.
+- [ ] Produit INAPP `blocnote_premium_lifetime` à **1,19 €** ; tester achat, annulation, restauration, remboursement/révocation, essai 24 h et export libre avant production.
+- [ ] Piste interne Google Play, test device, revue et soumission **NON FAITS**. Aucune version publique ni vente.
+- [x] **Dossier maître CHK** « PRIORITÉ 13-11-2026 — DOSSIER MAÎTRE MES NOTES & DOSSIERS » révision 4 et résumé court révision 30 actualisés. Préserver l'APK personnelle `com.chk.blocnote`.
+
+---
 # Play Console — vérifications de publication (Mes Notes & Dossiers)
 
 ## Fait dans le dépôt de préparation
