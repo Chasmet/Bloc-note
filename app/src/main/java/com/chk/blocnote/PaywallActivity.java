@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.text.InputType;
+import android.widget.EditText;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -74,6 +76,8 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
         buy.setOnClickListener(v -> controller.buy());
         Button restore = button(stack, "Restaurer mon achat Google Play");
         restore.setOnClickListener(v -> controller.restorePurchases());
+        Button review = button(stack, "Accès examinateur Google Play");
+        review.setOnClickListener(v -> requestReviewerCode());
         Button export = button(stack, "Exporter gratuitement toutes mes notes (JSON)");
         export.setOnClickListener(v -> openExport());
         if (preview) {
@@ -115,6 +119,29 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
             if (!preview) finish();
             else updateStatus();
         });
+    }
+
+    private void requestReviewerCode() {
+        final EditText field = new EditText(this);
+        field.setSingleLine(true);
+        field.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        field.setHint("Code privé d'accès examinateur");
+        new AlertDialog.Builder(this)
+            .setTitle("Accès d'évaluation Google Play")
+            .setMessage("Réservé aux examinateurs disposant du code fourni dans Play Console. Accès temporaire de 72 heures, sans achat.")
+            .setView(field)
+            .setNegativeButton("Annuler", null)
+            .setPositiveButton("Valider", (dialog, which) -> {
+                boolean valid = ReviewerAccess.activate(this, field.getText().toString());
+                field.getText().clear();
+                if (valid) {
+                    Toast.makeText(this, "Accès examinateur activé pour 72 heures", Toast.LENGTH_LONG).show();
+                    setResult(RESULT_OK);
+                    finish();
+                } else {
+                    Toast.makeText(this, "Code examinateur invalide", Toast.LENGTH_LONG).show();
+                }
+            }).show();
     }
 
     private void openExport() {
