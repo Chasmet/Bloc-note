@@ -13,6 +13,9 @@
             android:name=".PaywallActivity"
             android:exported="false" />
         <activity
+            android:name=".ReadOnlyNoteActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditorActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
