@@ -1,0 +1,98 @@
+name: Play — AAB signe QA interne sans ventes (jamais publication)
+
+on:
+  push:
+    branches:
+      - feature/play-sync30-mesnotesdossiers-20261112
+    paths:
+      - '.github/workflows/play-internal-qa-signed.yml'
+      - 'app/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa-aab-signed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Sources
+        uses: actions/checkout@v4
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: SDK Android 36
+        run: |
+          SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
+
+      - name: Restaurer et controler la cle d'upload privee
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BLOCNOTE_UPLOAD_JKS_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$KEYSTORE_BASE64" || -z "$ANDROID_KEYSTORE_PASSWORD" || -z "$ANDROID_KEY_ALIAS" || -z "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "::error::GitHub Secrets JKS incomplets : aucune signature autorisee."
+            exit 1
+          fi
+          if [[ "$ANDROID_KEY_ALIAS" != "sync30_mesnotes_upload" ]]; then
+            echo "::error::Alias d'upload inattendu."
+            exit 1
+          fi
+          printf %s "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sync30-upload.jks"
+          chmod 600 "$RUNNER_TEMP/sync30-upload.jks"
+          test -s "$RUNNER_TEMP/sync30-upload.jks"
+          actual_jks_sha="$(sha256sum "$RUNNER_TEMP/sync30-upload.jks" | cut -d' ' -f1)"
+          if [[ "$actual_jks_sha" != "0c224b9615e77a99f455072c1e98e2811c324c6cc1c853240859f0bd1e525c79" ]]; then
+            echo "::error::Le JKS ne correspond pas a la cle verifiee par le proprietaire."
+            exit 1
+          fi
+          cert_sha="$(keytool -list -v -keystore "$RUNNER_TEMP/sync30-upload.jks" -alias "$ANDROID_KEY_ALIAS" -storepass:env ANDROID_KEYSTORE_PASSWORD | sed -n 's/.*SHA256: //p' | head -1 | tr -d '\r')"
+          if [[ "$cert_sha" != "95:4C:04:AC:6F:3A:66:66:E0:69:1B:17:95:CB:15:6C:D9:7C:9D:F9:2F:B0:0A:AD:29:AC:0B:AE:1F:02:2C:EB" ]]; then
+            echo "::error::Empreinte du certificat upload incorrecte."
+            exit 1
+          fi
+          echo "Cle JKS et certificat d'upload verifies."
+      - name: Construire le bundle SIGNE pour tests internes sans paiement
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/sync30-upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if ! grep -q "applicationId 'com.sync30.mesnotesdossiers'" app/build.gradle; then
+            echo "::error::Package public inattendu."
+            exit 1
+          fi
+          gradle wrapper --gradle-version 8.13
+          chmod +x gradlew
+          ./gradlew :app:bundleRelease --stacktrace \
+            -PversionCode=$((34000 + GITHUB_RUN_NUMBER)) \
+            -PversionName=2.5.$GITHUB_RUN_NUMBER
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" | tee "$RUNNER_TEMP/jarsigner-result.txt"
+          grep -q "jar verified" "$RUNNER_TEMP/jarsigner-result.txt"
+          echo "### QA interne : AAB signe, transactions DESACTIVEES" >> "$GITHUB_STEP_SUMMARY"
+          echo "Aucun endpoint CHK Paiements integre : Play Billing refuse tout lancement d'achat." >> "$GITHUB_STEP_SUMMARY"
+          echo "NE PAS publier en production. Verifier package, certificat et versionCode avant import interne." >> "$GITHUB_STEP_SUMMARY"
+      - name: Deposer le bundle QA signe comme artefact GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync30-mesnotes-qa-signed-INTERNAL-ONLY
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
