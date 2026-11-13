@@ -6,7 +6,7 @@
 
 ## Faits techniques vérifiés sur la branche publique
 
-- Permissions Manifest : `android.permission.INTERNET` et `com.android.vending.BILLING` uniquement. Pas de permission de localisation, caméra ou microphone dans ce manifeste.
+- Manifeste **source** : `android.permission.INTERNET` et `com.android.vending.BILLING`. Inspection du manifeste **fusionné dans l'AAB signé du 13/11/2026** : présence supplémentaire de `android.permission.ACCESS_NETWORK_STATE` (dépendance). `AD_ID`, localisation, caméra et microphone non détectés. Ne pas se fonder uniquement sur le manifeste source pour la déclaration Play.
 - `android:allowBackup="true"` : les sauvegardes automatiques Android peuvent dépendre des réglages du système/du compte. Ne pas affirmer « aucune sauvegarde cloud possible ».
 - Stockage de notes et dossiers : base SQLite locale (`NoteDatabase`) ; export/import JSON avec actions volontaires de l'utilisateur.
 - Paiements : bibliothèque `com.android.billingclient:billing:9.1.0`, achat intégré non consommable `blocnote_premium_lifetime`. Le code transmet en HTTPS au vérificateur CHK Paiements : `packageName`, `productId`, `purchaseToken`. Aucune URL Render n'est imposée à cette vérification.
@@ -52,3 +52,14 @@
 - [ ] Vérifier la compilation et tester réellement sur Android : code incorrect refusé, code valide accepté, accès à la création/édition sans achat, expiration à 72 h, aucune élévation de licence Billing.
 - [ ] Enregistrer dans le formulaire **App access** privé de Google Play : restriction = oui, chemin Menu → Mon accès : essai 24h / achat unique → Accès examinateur Google Play, et coller le code depuis CHK privé. L'accès n'est pas un abonnement ni une vente.
 - [ ] Recharger Play Console et confirmer les instructions sauvegardées. Le simple développement Android **ne valide pas** la déclaration officielle.
+
+
+## Audit indépendant du bundle signé — 13 novembre 2026
+
+- Artefact release exact issu du run [43485466135](https://github.com/Chasmet/Bloc-note/actions/runs/43485466135), artifact ID `14067930210` ; fichier extrait `app-release.aab`.
+- Vérification locale `jarsigner -verify -verbose` : **exit code 0, `jar verified.`**.
+- `keytool -printcert -jarfile` : SHA-256 signataire `95:4C:04:AC:6F:3A:66:66:E0:69:1B:17:95:CB:15:6C:D9:7C:9D:F9:2F:B0:0A:AD:29:AC:0B:AE:1F:02:2C:EB` ; correspond au certificat JKS upload CHK.
+- `base/manifest/AndroidManifest.xml` dans l'AAB : package `com.sync30.mesnotesdossiers`, `versionCode=24014`, `versionName=2.4.14`, libellé `Mes Notes & Dossiers`.
+- SHA-256 du **fichier AAB** : `bdbfecf0d767a816d3ec64b39e8e16fff9dbb9d37ff34053eecbb56fc62fec3b`.
+- Permissions détectées dans le manifeste fusionné : `INTERNET`, `BILLING`, `ACCESS_NETWORK_STATE`. `AD_ID` non détectée. Pour les formulaires Google Play, contrôler la version exacte à soumettre et ses dépendances.
+- Le bundle est **signé pour les tests internes**, mais n'a pas été téléversé sur une piste Play Console ni testé en conditions de vente réelles ; il ne prouve pas l'état de CHK Paiements.
