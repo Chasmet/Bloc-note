@@ -1,3 +1,15 @@
+## REPRISE PLAY CONSOLE — PUBLIC CIBLE VALIDÉ, 13/11/2026
+
+- [x] **Classification du contenu IARC** : statut **Completed**, soumis le 13 novembre 2026 à 22 h 51, vérifié directement dans Play Console.
+- [x] **Advertising ID** : réponse **No** enregistrée et relue ; manifeste AAB signé sans `AD_ID`.
+- [x] **Target audience and content** : tranches cochées et **enregistrées** : 13–15, 16–17 et 18 ans et plus. IMPORTANT : l'option **5 ans et moins avait été cochée** ; elle a été **décochée** et les trois tranches 13+ vérifiées. Résumé Google « Change saved », sans soumission de publication.
+- [ ] **Data safety** : formulaire à l'étape **Preview 5/5**, déclarations préremplies incluant Financial info → Purchase history collecté, pas de partage déclaré, HTTPS transit, aucune suppression via demande. **Non soumis.** Contrôler vérification CHK Paiements, finalité, durée de conservation et transferts avant validation : la branche backend `Chasmet/CHK-serveur-Universal-Control` / `feature/paiements-sync30-public-20261112` a une CI verte, mais n'est pas déployée ni testée en production ; le serveur Windows et l'API Google Play ne sont pas validés.
+- [ ] **Store settings** : catégorie Productivité vérifiée mais contacts professionnels e-mail/site non enregistrés ; statut trader à compléter.
+- [ ] **Publication** : AAB commercial, Google Play Billing réel, piste interne et revue Google **non réalisés**. Ne pas publier avant test du vérificateur de licences.
+- [x] Note de reprise CHK « ÉTAT DU PROJET » mise à jour. Navigateur CHK inaccessible pour commandes finales après bascule en arrière-plan, ne pas confondre « page affichée » et action effectivement enregistrée.
+
+---
+
 ## REPRISE CONSOLE — 13 NOVEMBRE 2026, SOIR (POST-IMPORT)
 
 Ce bloc est le **dernier contrôle effectif** et prévaut sur les anciennes cases historiques du fichier.
