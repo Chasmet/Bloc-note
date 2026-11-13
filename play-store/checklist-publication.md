@@ -1,3 +1,27 @@
+## KIT VISUELS — 7/7 PRÉPARÉS DANS CHK (13/11/2026)
+
+Fichiers **copiés et vérifiés par SHA-256** dans le dossier privé CHK Android
+`Categories/Images/application bloc note/VISUELS GOOGLE PLAY - OFFICIELS/`.
+Les fichiers d'origine GitHub et CHK n'ont pas été modifiés.
+
+| Zone à remplir dans Play Console | Fichier CHK clairement identifié |
+| --- | --- |
+| App icon, 512 × 512 | `00_LOGO_GOOGLE_PLAY_512x512.png` |
+| Feature graphic, 1024 × 500 | `01_BANNIERE_GOOGLE_PLAY_1024x500.jpg` |
+| Phone screenshot 1 — Accueil | `02_CAPTURE_01_ACCUEIL_NOTES_1080x1920.png` |
+| Phone screenshot 2 — Favoris | `03_CAPTURE_02_FAVORIS_1080x1920.png` |
+| Phone screenshot 3 — Dossiers | `04_CAPTURE_03_DOSSIERS_1080x1920.png` |
+| Phone screenshot 4 — Archives | `05_CAPTURE_04_ARCHIVES_1080x1920.png` |
+| Phone screenshot 5 — Éditeur | `06_CAPTURE_05_EDITEUR_1080x1920.png` |
+
+Dans le même dossier, `00_LIRE_AVANT_IMPORT_GOOGLE_PLAY.txt` donne le rôle de chaque média et ses fichiers sources. Note épinglée CHK : « VISUELS GOOGLE PLAY — 7/7 nommés et prêts à importer ».
+
+- [x] Sept médias CHK nommés et vérifiés.
+- [ ] **Import Google Play non encore vérifié** : renseigner App icon, Feature graphic et les cinq Phone screenshots. Enregistrer et recharger les pages pour confirmer la persistance.
+- [ ] Ne JAMAIS importer le dossier voisin « documents signés et autre » contenant des fichiers de signature privés.
+
+---
+
 ## ÉTAT ACTUEL PRIORITAIRE — 13 novembre 2026, après correctifs examinateur
 
 **Les anciennes cases de la liste ci-dessous décrivent l'historique. CE BILAN prévaut :**
