@@ -91,8 +91,8 @@ public class MainActivity extends Activity {
         // Un remboursement ou une révocation confirmé par Google enlève l'accès Premium.
         entitlementController = new PlayBillingController(this, new PlayBillingController.Listener() {
             @Override public void onBillingStatus(String message, boolean canPurchase, String price) {
-                if (!TrialAccess.hasAccess(MainActivity.this) && !paywallOpen
-                        && !isFinishing() && !isDestroyed()) checkCommercialAccess();
+                // Une panne du service de paiement ne doit pas masquer les notes existantes.
+                // Les actions d'écriture continuent de passer par checkCommercialAccess().
             }
             @Override public void onAccessRestored() {
                 // Le contrôleur principal n'ouvre jamais de fenêtre d'achat.
@@ -339,7 +339,13 @@ public class MainActivity extends Activity {
     }
 
     private void openEditor(long noteId) {
-        if (!checkCommercialAccess()) return;
+        if (!TrialAccess.hasAccess(this)) {
+            // Lecture accessible hors ligne, sans ouvrir ni modifier l'éditeur.
+            Intent view = new Intent(this, ReadOnlyNoteActivity.class);
+            view.putExtra("note_id", noteId);
+            startActivity(view);
+            return;
+        }
         Intent i = new Intent(this, EditorActivity.class);
         i.putExtra("note_id", noteId);
         startActivity(i);
@@ -367,13 +373,8 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (db != null) reload();
-        if (!TrialAccess.hasAccess(this)) {
-            if (!paywallOpen) {
-                paywallOpen = true;
-                startActivityForResult(new Intent(this, PaywallActivity.class), 504);
-            }
-            return;
-        }
+        // Après les 24 heures, dossiers/recherche/lecture restent consultables.
+        // Création et modification restent payantes, et l'export JSON reste gratuit.
         paywallOpen = false;
         maybeAskPin();
     }
@@ -639,7 +640,7 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 504) {
             paywallOpen = false;
-            if (!TrialAccess.hasAccess(this)) checkCommercialAccess();
+            // Quitter le paywall ne doit jamais empêcher la consultation des notes.
             return;
         }
         if (resultCode != RESULT_OK || data == null || data.getData() == null) return;
