@@ -296,3 +296,13 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - Ne pas réimporter l'ancien AAB `Sync30_MesNotes.aab` / 50017 : invalidé par Google. Effacer seulement ses lignes d'erreur dans la console, sans toucher aux archives ou données de l'application personnelle.
 - La vérification de paiement CHK HTTPS renvoyait HTTP 503 au dernier contrôle ; **aucune vente ni publication avant `billingReady=true` et contrôle d'achat, restauration, annulation, remboursement.**
 - Prévol obligatoire : vérifier dans l'AAB réel package, minSdk >= 24, targetSdk conforme, versionCode supérieur, certificat d'upload, Google Play Billing, endpoint de vérification HTTPS vivant, et réponses des formulaires Console.
+
+
+## Contrôle final de la production — 14 novembre 2026
+
+- **FAIT / RELU dans Play Console** : AAB de production `com.sync30.mesnotesdossiers` versionName **2.6.19**, versionCode **50019**, Android API **24+**, target **36**, bundle affiché `Enhanced` et accepté dans le brouillon de production. L'ancien AAB 50017 a été rejeté (minSdk 23) et ne doit pas être utilisé.
+- **FAIT / RELU** : zone de diffusion **14 pays** sauvegardée par l'éditeur et relue sur la piste Production : Belgique, Canada, Djibouti, Égypte, France, Gabon, Gambie, Maroc, Sénégal, Togo, Tunisie, Émirats arabes unis, Royaume-Uni et États-Unis.
+- **FAIT / RELU** : Play Console « Preview and confirm » validé et brouillon enregistré ; message Google « Your change has been saved. To send it to Google for review, go to Publishing overview. » Le tableau de bord affiche 3/5 étapes de la production complètes ; restent soumettre à examen puis publier. Aucune mise en examen confirmée.
+- **BLOQUÉ — VENTES** : le point de contrôle HTTPS `https://chk-universal-1.taild9e4de.ts.net:10000/api/v1/play/health` n'est pas joignable depuis CHK Agent Browser Android (erreur `net::ERR_CONNECTION_CLOSED`) ; l'environnement d'inspection externe ne résout pas ce domaine privé. Ancien contrôle renvoyait HTTP 503. Pas de preuve du prérequis `billingReady=true`, ni de vérification Google Play Developer API, de prix locaux actifs pour `blocnote_premium_lifetime`, ni d'achat / restauration / remboursement validés.
+- **DÉCISION DE SÉCURITÉ** : ne pas cliquer sur l'envoi final d'examen pour une application payante en fonctions premium tant que le service de validation d'achat n'est pas sain. L'éditeur maintient Free + essai 24 h + achat intégré unique 1,19 € sans abonnement ; la fiche ne doit pas devenir « app payante à télécharger ».
+- **PRODUCTION** : brouillon prêt mais **non soumis / non publié** au dernier contrôle. La version personnelle `com.chk.blocnote` reste hors périmètre.
