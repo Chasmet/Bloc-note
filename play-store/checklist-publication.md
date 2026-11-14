@@ -1,3 +1,7 @@
+## État vérifié après sauvegarde des coordonnées — 14/11/2026
+
+Play Console : coordonnées et fiche validées après rechargement, 10/11. Data safety seul ouvert : historique d’achat sélectionné, ligne Start absente à l’étape 4, sauvegarde sur Submitting. Production non soumise ; paiement Windows et AAB commercial en attente.
+
 ## REPRISE DU 14 NOVEMBRE 2026 — CONTRÔLES ET CORRECTIFS
 
 - **Play Console** : compte Sync 30 Numérique vérifié comme **Organization account**. Le statut commerçant affiche **Action required**. Le package `com.sync30.mesnotesdossiers` est affiché en **Draft**. Tableau de bord **8/11**, avec contacts, fiche et Data safety encore ouverts. Catégorie **Productivity** confirmée. Une nouvelle navigation dans Store settings retrouve les champs de contact vides. L’ancien onglet contient les valeurs dans une modale désactivée, ce qui ne prouve pas leur sauvegarde. Les clics ne sont pas confirmés par le WebView CHK en arrière-plan.
