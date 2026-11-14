@@ -135,7 +135,10 @@ jobs:
           assert manifest.attrib['package'] == 'com.sync30.mesnotesdossiers'
           assert manifest.attrib[android + 'versionCode'] == os.environ['PLAY_VERSION_CODE']
           assert manifest.attrib[android + 'versionName'] == os.environ['PLAY_VERSION_NAME']
-          assert manifest.find('uses-sdk').attrib[android + 'targetSdkVersion'] == '36'
+          uses_sdk = manifest.find('uses-sdk')
+          assert uses_sdk is not None, 'Declaration uses-sdk absente'
+          assert int(uses_sdk.attrib[android + 'minSdkVersion']) >= 24, 'Google Play Automatic Protection exige minSdk >= 24'
+          assert uses_sdk.attrib[android + 'targetSdkVersion'] == '36'
           permissions = {item.attrib[android + 'name'] for item in manifest.findall('uses-permission')}
           allowed = {'android.permission.INTERNET', 'com.android.vending.BILLING',
                      'android.permission.ACCESS_NETWORK_STATE'}
