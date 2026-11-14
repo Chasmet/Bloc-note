@@ -139,6 +139,11 @@ jobs:
           permissions = {item.attrib[android + 'name'] for item in manifest.findall('uses-permission')}
           allowed = {'android.permission.INTERNET', 'com.android.vending.BILLING',
                      'android.permission.ACCESS_NETWORK_STATE'}
+          internal = manifest.attrib['package'] + '.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+          if internal in permissions:
+              declaration = manifest.find("permission[@" + android + "name='" + internal + "']")
+              assert declaration is not None and declaration.get(android + 'protectionLevel') in ('signature', '0x00000002', '0x2', '2'), internal
+              allowed.add(internal)
           assert {'android.permission.INTERNET', 'com.android.vending.BILLING'} <= permissions <= allowed, permissions
           billing = manifest.find("application/meta-data[@" + android + "name='com.google.android.play.billingclient.version']")
           assert billing is not None and billing.attrib[android + 'value'].startswith('9.'), 'Version Play Billing absente ou inattendue'
