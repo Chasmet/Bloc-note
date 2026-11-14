@@ -1,3 +1,8 @@
+## Data safety enregistré — 14/11/2026
+
+- Capture Preview : « Change saved. Send for review in Publishing overview. » Déclaration enregistrée, revue non envoyée.
+- Production → Releases : brouillon existant « Untitled release », piste inactive, 0 pays. AAB signé 50017 déjà sauvegardé. La vérification publique des achats renvoie toujours HTTP 503.
+
 ## AAB commercial signé — 14/11/2026
 
 - [Build réussi 43584944637](https://github.com/Chasmet/Bloc-note/actions/runs/43584944637), version 2.6.17 / 50017, package `com.sync30.mesnotesdossiers`. Signature, manifeste et structure vérifiés. SHA-256 AAB `c2549200a3ede70fcb185e65049133960cd94393ec835cac5551ddd9513d60ff`.
