@@ -3,6 +3,7 @@ package com.chk.blocnote;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,23 +38,41 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
         controller.connect();
     }
 
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     private TextView text(String content, int sp, int color) {
         TextView v = new TextView(this);
         v.setText(content);
         v.setTextSize(sp);
         v.setTextColor(color);
         v.setGravity(Gravity.CENTER_HORIZONTAL);
-        v.setPadding(16, 15, 16, 15);
+        v.setPadding(dp(10), dp(8), dp(10), dp(8));
         return v;
     }
-    private Button button(LinearLayout stack, String label) {
+
+    /** Hauteurs en dp, texte lisible et zone tactile accessible, y compris en police agrandie. */
+    private Button button(LinearLayout stack, String label, boolean primary) {
         Button b = new Button(this);
-        b.setText(label); b.setAllCaps(false);
-        b.setTextSize(16);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, 62);
-        lp.setMargins(0, 9, 0, 9);
+        b.setText(label);
+        b.setAllCaps(false);
+        b.setTextSize(15);
+        b.setTextColor(Color.WHITE);
+        b.setGravity(Gravity.CENTER);
+        b.setMinHeight(dp(52));
+        b.setPadding(dp(12), dp(10), dp(12), dp(10));
+        b.setBackgroundTintList(ColorStateList.valueOf(
+            primary ? Color.rgb(180, 94, 24) : Color.rgb(93, 65, 48)));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, dp(5), 0, dp(5));
         stack.addView(b, lp);
         return b;
+    }
+
+    private Button button(LinearLayout stack, String label) {
+        return button(stack, label, false);
     }
 
     private void buildUi() {
@@ -62,16 +81,17 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
         scroller.setBackgroundColor(Color.rgb(23, 13, 9));
         LinearLayout stack = new LinearLayout(this);
         stack.setOrientation(LinearLayout.VERTICAL);
-        stack.setGravity(Gravity.CENTER);
-        int pad = (int) (24 * getResources().getDisplayMetrics().density);
+        stack.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        int pad = dp(18);
         stack.setPadding(pad, pad, pad, pad);
         scroller.addView(stack);
-        stack.addView(text("Mes Notes & Dossiers", 27, Color.rgb(255, 196, 116)));
-        stack.addView(text("24 heures gratuites, puis accès à vie", 21, Color.WHITE));
-        description = text("", 17, Color.rgb(234, 203, 179));
+        stack.addView(text("Mes Notes & Dossiers", 25, Color.rgb(255, 196, 116)));
+        stack.addView(text("24 heures d'essai gratuit", 20, Color.WHITE));
+        description = text("", 18, Color.rgb(255, 206, 151));
         stack.addView(description);
-        stack.addView(text("Vos notes et dossiers restent enregistrés. Aucun abonnement, aucun renouvellement automatique.", 15, Color.WHITE));
-        buy = button(stack, "Acheter l'accès définitif");
+        stack.addView(text("Achat unique à vie : 1,19 € en France. Aucun abonnement ni prélèvement automatique.", 15, Color.WHITE));
+        stack.addView(text("Vos notes restent enregistrées et exportables gratuitement après l'essai.", 14, Color.rgb(234, 203, 179)));
+        buy = button(stack, "Acheter l'accès définitif", true);
         buy.setEnabled(false);
         buy.setOnClickListener(v -> controller.buy());
         Button restore = button(stack, "Restaurer mon achat Google Play");
@@ -87,7 +107,7 @@ public final class PaywallActivity extends Activity implements PlayBillingContro
         Button privacy = button(stack, "Politique de confidentialité");
         privacy.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://sync30.onrender.com/politique-confidentialite-blocnote.html"))));
-        billingState = text("Connexion Google Play…", 13, Color.rgb(206, 167, 130));
+        billingState = text("Connexion Google Play…", 14, Color.rgb(243, 195, 151));
         stack.addView(billingState);
         stack.addView(text("Montant définitif et moyen de paiement affichés par Google Play avant confirmation.", 12, Color.rgb(171, 141, 120)));
         setContentView(scroller);
