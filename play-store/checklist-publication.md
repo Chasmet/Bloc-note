@@ -1,3 +1,13 @@
+## DÉCISION ÉDITEUR — 14 NOVEMBRE 2026 : PRODUCTION DIRECTE, ESSAI 24 H
+
+- **Modèle commercial inchangé** : téléchargement Play Store déclaré **gratuit (Free)** ; l'application propose un **essai gratuit de 24 heures**, puis un **achat intégré non consommable unique à 1,19 €** pour restaurer et conserver les fonctions premium ; **pas d'abonnement**. Les notes existantes restent consultables après l'essai, sans forcer l'achat.
+- **Choix explicite du propriétaire** : **ne pas publier sur la piste de tests internes** ; après préparation et conformité, soumettre **directement en production** à Google Play, sous réserve que la Console autorise cette piste pour le compte Organisation. Pas de période de test interne exigée par l'éditeur. Les vérifications techniques automatiques (CI, signature et sécurité) demeurent.
+- **NE PAS utiliser en production** l'AAB QA signé (2.5.6, versionCode 34006) : ce bundle possède les achats désactivés ; il ne répond pas au modèle 24 h + 1,19 €. Il faut un **nouvel AAB commercial release signé** (versionCode supérieur) avec Billing Google Play et vérificateur CHK Paiements HTTPS fonctionnels.
+- **Prérequis avant envoi** : terminer les **3/11 tâches Console** (Data safety, coordonnées/catégorie, fiche), vérifier l'identité du compte, le statut commerçant, l'achat intégré `blocnote_premium_lifetime` à 1,19 €, configurer et valider la passerelle existante, puis générer/contrôler l'AAB de production. La signature/CI d'un bundle QA ne signifie pas que la production est prête.
+- Ne jamais transformer la fiche en **application payante à télécharger**, ce qui supprimerait la logique d'essai 24 h. Ne pas toucher au package personnel `com.chk.blocnote`.
+
+---
+
 ## REPRISE VÉRIFIÉE — 14 NOVEMBRE 2026 (GOOGLE PLAY & PAIEMENTS)
 
 - [x] **Google Play Console : 8/11 tâches validées**, relu sur tableau de bord. Les 3 tâches encore ouvertes : Data safety, « Select an app category and provide contact details », « Set up your store listing ». La piste interne est bloquée tant que les tâches initiales ne sont pas terminées.
