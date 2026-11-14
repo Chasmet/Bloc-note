@@ -306,3 +306,16 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - **BLOQUÉ — VENTES** : le point de contrôle HTTPS `https://chk-universal-1.taild9e4de.ts.net:10000/api/v1/play/health` n'est pas joignable depuis CHK Agent Browser Android (erreur `net::ERR_CONNECTION_CLOSED`) ; l'environnement d'inspection externe ne résout pas ce domaine privé. Ancien contrôle renvoyait HTTP 503. Pas de preuve du prérequis `billingReady=true`, ni de vérification Google Play Developer API, de prix locaux actifs pour `blocnote_premium_lifetime`, ni d'achat / restauration / remboursement validés.
 - **DÉCISION DE SÉCURITÉ** : ne pas cliquer sur l'envoi final d'examen pour une application payante en fonctions premium tant que le service de validation d'achat n'est pas sain. L'éditeur maintient Free + essai 24 h + achat intégré unique 1,19 € sans abonnement ; la fiche ne doit pas devenir « app payante à télécharger ».
 - **PRODUCTION** : brouillon prêt mais **non soumis / non publié** au dernier contrôle. La version personnelle `com.chk.blocnote` reste hors périmètre.
+
+
+## Reprise publication Google Play — AAB 50022 (14/11/2026)
+
+- **FAIT** : paiement Android remplacé sur la branche publique par un flux direct Google Play Billing sans dépendance au serveur CHK Paiements, commit `ef96b0a`. La validation côté client est moins résistante à la fraude que la vérification serveur. Ne pas prétendre que la vente réelle est testée.
+- **FAIT** : suppression du paramètre endpoint serveur devenu inutilisé (commit `64cf663`) et correction du workflow de release (commit `394f0f7`).
+- **TESTÉ** : GitHub Actions signé run `43591257475` **SUCCESS**, artefact `mesnotesdossiers-production-v50022` (code 50022, name 2.6.22, signature publique conforme).
+- **TESTÉ** : AAB 50022 transféré et extrait sur CHK Android sous `Sync30/GooglePlay/MesNotesDossiers/Production_50022/app-release.aab`, taille 2 497 760 octets, SHA256 `9c61b6c7b1109c4b95296142183e7fe5f647a6188fd9ecec1dd9a39d2a361038` confirmé sur l'Android.
+- **FAIT** : AAB 50022 importé dans Google Play Console, validé par Play (Enhanced, min API 24, target 36). Release notes FR décrivant le passage à Google Play Billing enregistrées.
+- **FAIT, STATUT OBSERVÉ** : dans **Publishing overview**, Google Play affiche `Changes in review` avec **Production 50022 (2.6.22), Start full rollout**. Les contrôles automatiques affichent `Running quick checks for commonly found issues` ; la page précise que l'envoi à l'examen suit l'achèvement favorable de ces contrôles.
+- **NON FAIT** : ne pas déclarer 50022 publiée / active tant que la piste Production n'indique pas `Active / Latest release 50022`. La précédente 50019 était active au début de cette intervention.
+- **À TESTER** : état actif et tarif local Google Play du produit unique `blocnote_premium_lifetime` (prix de référence 1,19 EUR), achat, annulation, remboursement et restauration sur plusieurs comptes ; confirmer au besoin la cohérence Data Safety. Le client Billing seul ne remplace pas une vérification serveur antifraude.
+- **AUCUN CHANGEMENT** de package/signature et pas de suppression des données de l'application personnelle `com.chk.blocnote`.
