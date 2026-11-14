@@ -56,10 +56,22 @@ public final class PlayBillingController {
             .build();
     }
 
+    /**
+     * Les produits Google Play historiques avec une seule option d'achat
+     * renvoient getOneTimePurchaseOfferDetails(), tandis que les nouvelles
+     * options/offres multiples utilisent getOneTimePurchaseOfferDetailsList().
+     * Ne jamais bloquer un achat unique parce que la liste est absente.
+     */
+    private ProductDetails.OneTimePurchaseOfferDetails purchaseOffer() {
+        if (product == null) return null;
+        List<ProductDetails.OneTimePurchaseOfferDetails> offers =
+            product.getOneTimePurchaseOfferDetailsList();
+        if (offers != null && !offers.isEmpty()) return offers.get(0);
+        return product.getOneTimePurchaseOfferDetails();
+    }
+
     private boolean ready() {
-        return !closed && connected && billing.isReady() && product != null
-            && product.getOneTimePurchaseOfferDetailsList() != null
-            && !product.getOneTimePurchaseOfferDetailsList().isEmpty();
+        return !closed && connected && billing.isReady() && purchaseOffer() != null;
     }
 
     public void connect() {
@@ -111,14 +123,21 @@ public final class PlayBillingController {
                         break;
                     }
                 }
-                if (ready()) {
-                    price = product.getOneTimePurchaseOfferDetailsList()
-                        .get(0).getFormattedPrice();
+                ProductDetails.OneTimePurchaseOfferDetails offer = purchaseOffer();
+                if (ready() && offer != null) {
+                    price = offer.getFormattedPrice();
                     report("Achat définitif Google Play disponible.");
                     return;
                 }
             }
-            report("Produit d'achat unique non disponible sur Google Play.");
+            if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                report("Catalogue Google Play indisponible (code "
+                    + result.getResponseCode() + ").");
+            } else {
+                report("Achat unique non proposé par Google Play : vérifier que le produit "
+                    + PRODUCT_ID + " et son option d'achat sont actifs en France, "
+                    + "ainsi que l'installation depuis Google Play.");
+            }
         });
     }
 
@@ -235,12 +254,15 @@ public final class PlayBillingController {
             report("Licence définitive déjà acquise.");
             return;
         }
-        List<ProductDetails.OneTimePurchaseOfferDetails> offers =
-            product.getOneTimePurchaseOfferDetailsList();
+        ProductDetails.OneTimePurchaseOfferDetails offer = purchaseOffer();
+        if (offer == null) {
+            report("Offre Google Play indisponible. Relancer la connexion.");
+            return;
+        }
         BillingFlowParams.ProductDetailsParams.Builder item =
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(product);
-        String offerToken = offers.get(0).getOfferToken();
+        String offerToken = offer.getOfferToken();
         if (offerToken != null && !offerToken.isEmpty()) {
             item.setOfferToken(offerToken);
         }
