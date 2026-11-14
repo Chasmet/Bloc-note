@@ -64,16 +64,21 @@ jobs:
             exit 1
           fi
           echo "Certificat d'upload conforme a la fiche Sync 30." >> "$GITHUB_STEP_SUMMARY"
-      - name: Configurer l’URL HTTPS de vérification des achats
+      - name: Verifier le paiement Google Play sans serveur externe
         shell: bash
-        env:
-          CHK_PAYMENTS_VERIFY_ENDPOINT: ${{ secrets.BLOCNOTE_CHK_PAYMENTS_VERIFY_URL || 'https://chk-universal-1.taild9e4de.ts.net:10000/api/v1/play/verify' }}
         run: |
-          case "$CHK_PAYMENTS_VERIFY_ENDPOINT" in
-            https://*/api/v1/play/verify) ;;
-            *) echo "::error::URL CHK Paiements invalide"; exit 1 ;;
-          esac
-          echo "Vérifier que /api/v1/play/health répond avec billingReady=true avant soumission à Google Play." >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY'
+          from pathlib import Path
+          billing = Path('app/src/main/java/com/chk/blocnote/PlayBillingController.java').read_text()
+          gradle = Path('app/build.gradle').read_text()
+          assert 'com.android.billingclient' in billing
+          assert 'queryPurchasesAsync(' in billing
+          assert 'acknowledgePurchase(' in billing
+          assert 'Purchase.PurchaseState.PURCHASED' in billing
+          assert 'CHK_PAYMENTS_VERIFY_ENDPOINT' not in billing
+          assert 'chkPaymentsVerifyEndpoint' not in gradle
+          print('Google Play Billing client-only, restauration et acquittement controles.')
+          PY
       - name: Calculer la version de production
         id: version
         shell: bash
@@ -94,7 +99,6 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_STORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
-          CHK_PAYMENTS_VERIFY_ENDPOINT: ${{ secrets.BLOCNOTE_CHK_PAYMENTS_VERIFY_URL || 'https://chk-universal-1.taild9e4de.ts.net:10000/api/v1/play/verify' }}
           PLAY_VERSION_CODE: ${{ steps.version.outputs.code }}
           PLAY_VERSION_NAME: ${{ steps.version.outputs.name }}
         run: |
@@ -102,8 +106,7 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:bundleRelease --stacktrace \
             -PversionCode="$PLAY_VERSION_CODE" \
-            -PversionName="$PLAY_VERSION_NAME" \
-            -PchkPaymentsVerifyEndpoint="$CHK_PAYMENTS_VERIFY_ENDPOINT"
+            -PversionName="$PLAY_VERSION_NAME"
           AAB=app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
           jarsigner -verify "$AAB" | grep -q "jar verified"
