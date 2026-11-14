@@ -1,3 +1,14 @@
+## TENTATIVE DE SOUMISSION DIRECTE — 14/11/2026
+
+- [x] Demande explicite : **soumettre maintenant en production**, sans piste interne, **sans supprimer l'essai gratuit 24 h** ; distribution gratuite avec achat intégré unique à 1,19 €.
+- [x] Play Console accédée en direct via CHK Browser Local 3 : piste **Production = Inactive**. Bouton `Create new release` actif sur la page `/tracks/production`, navigation réalisée vers `/tracks/4697558183771309621/create`. La page de création reste à « Loading Google Play Console » : aucun formulaire d'AAB exploitable, aucun envoi de release.
+- [ ] Tableau de bord Play Console **8/11** : `Data safety`, `Select an app category and provide contact details`, `Set up your store listing` non validés. Section de publication : étapes `Select countries and regions`, `Create and roll out a release`, `Preview and confirm`, `Send release to Google for review`, `Publish` encore verrouillées.
+- [ ] Fiche visuelle de production : Review ouverte (titre « Mes Notes & Dossiers », descriptions FR présentes, icône et bannière 1/1, 4 captures). `Save` envoyé, mais devient désactivé sans message de réussite ni persistance confirmée. Contacts Store settings (email/site) demeurent affichés dans une modale avec `Save` désactivé ; résultat métier NON CONFIRMÉ.
+- [ ] Le seul AAB signé vérifié reste **QA 2.5.6 / versionCode 34006**, avec paiements désactivés. NE PAS le déposer pour la production. Le workflow commercial exige une passerelle HTTPS CHK Paiements confirmée et une nouvelle signature AAB.
+- [ ] **Résultat réel : PAS SOUMIS, PAS PUBLIÉ**. Reprendre dès que la Console permet de sauver les champs, terminer Data safety, activer produit Play Billing et backend public, puis générer et déposer l'AAB commercial, sans piste de test interne.
+
+---
+
 ## DÉCISION ÉDITEUR — 14 NOVEMBRE 2026 : PRODUCTION DIRECTE, ESSAI 24 H
 
 - **Modèle commercial inchangé** : téléchargement Play Store déclaré **gratuit (Free)** ; l'application propose un **essai gratuit de 24 heures**, puis un **achat intégré non consommable unique à 1,19 €** pour restaurer et conserver les fonctions premium ; **pas d'abonnement**. Les notes existantes restent consultables après l'essai, sans forcer l'achat.
