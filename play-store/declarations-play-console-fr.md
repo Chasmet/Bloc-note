@@ -1,3 +1,5 @@
+> **ÉTAT ACTUALISÉ 14/11/2026 — PREUVE Play Console : 8/11 tâches terminées.** Les blocs ci-dessous datant du 13/11 sont des historiques, pas l'état courant. IARC, public cible 13+, Ads, Sign-in details, Santé, Finances, Gouvernement et politique de confidentialité ont été validés. Restent : Data safety, Store settings (coordonnées), Store listing. Pour le suivi technique/CI et les SHA-256 de l'AAB signé QA 2.5.6 (34006), voir `play-store/checklist-publication.md`. L'AAB n'a pas été envoyé sur Play. **Backend Windows CHK Paiements non déployé ; vente interdite jusqu'aux tests réels.**
+
 # Mes Notes & Dossiers — déclarations Play Console (base vérifiée)
 
 Éditeur : **Sync 30 Numérique**. Identifiant Play : `4976373584470422373`. Package **public** retenu : `com.sync30.mesnotesdossiers`. APK personnelle distincte `com.chk.blocnote` (ne pas modifier).
