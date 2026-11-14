@@ -1,3 +1,7 @@
+## Vérification AAB commercial — 14/11/2026
+
+Le moteur Windows actif écoute sur 8795. [Correctif de passerelle](https://github.com/Chasmet/CHK-serveur-Universal-Control/commit/6806a636d111bfcd89c40fd79925acd71229ea47) copié et relu sur le PC. [CI Windows réussie](https://github.com/Chasmet/CHK-serveur-Universal-Control/actions/runs/43584151724). Le nouveau contrôle du port HTTPS public 10000 renvoie 503. Activation publique non confirmée, dernier run commercial en échec, aucun AAB commercial généré. Reprendre après confirmation de `billingReady=true` à l’URL publique et configuration de `BLOCNOTE_CHK_PAYMENTS_VERIFY_URL`.
+
 ## État vérifié après sauvegarde des coordonnées — 14/11/2026
 
 Play Console : coordonnées et fiche validées après rechargement, 10/11. Data safety seul ouvert : historique d’achat sélectionné, ligne Start absente à l’étape 4, sauvegarde sur Submitting. Production non soumise ; paiement Windows et AAB commercial en attente.
