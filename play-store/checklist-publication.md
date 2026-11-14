@@ -1,3 +1,8 @@
+## AAB commercial signé — 14/11/2026
+
+- [Build réussi 43584944637](https://github.com/Chasmet/Bloc-note/actions/runs/43584944637), version 2.6.17 / 50017, package `com.sync30.mesnotesdossiers`. Signature, manifeste et structure vérifiés. SHA-256 AAB `c2549200a3ede70fcb185e65049133960cd94393ec835cac5551ddd9513d60ff`.
+- L’URL HTTPS actuellement intégrée a renvoyé 503 au contrôle public. Play Console affiche 10/11, Data safety ouvert et envoi verrouillé. AAB récupéré, production non soumise.
+
 ## Vérification AAB commercial — 14/11/2026
 
 Le moteur Windows actif écoute sur 8795. [Correctif de passerelle](https://github.com/Chasmet/CHK-serveur-Universal-Control/commit/6806a636d111bfcd89c40fd79925acd71229ea47) copié et relu sur le PC. [CI Windows réussie](https://github.com/Chasmet/CHK-serveur-Universal-Control/actions/runs/43584151724). Le nouveau contrôle du port HTTPS public 10000 renvoie 503. Activation publique non confirmée, dernier run commercial en échec, aucun AAB commercial généré. Reprendre après confirmation de `billingReady=true` à l’URL publique et configuration de `BLOCNOTE_CHK_PAYMENTS_VERIFY_URL`.
