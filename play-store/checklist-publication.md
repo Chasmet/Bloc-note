@@ -285,3 +285,14 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - [x] **Description courte corrigée et persistante** dans Default store listing : « Prenez des notes et organisez vos dossiers et vos favoris simplement ». Le bouton Save as draft a confirmé l'enregistrement et une nouvelle navigation a retrouvé ce texte.
 - [ ] Store listing contact details (e-mail et site professionnel) : non encore enregistrés, champs vides au contrôle. Les sélecteurs de contact et le picker Add assets sont difficiles à piloter via CHK en arrière-plan ; ne pas inventer de sauvegarde.
 - [ ] Icon 512, banner 1024×500, 5 captures : aucun upload confirmé. Sources présentes dans `play-store/assets` et `play-store/screenshots` du dépôt ; préserver les captures réelles.
+
+
+## Incident Play SDK minimum — 14/11/2026
+
+- Le dépôt du bundle 2.6.17 / versionCode 50017 a été refusé par Google Play Automatic Protection : minSdk 23 au lieu de 24 minimum.
+- Correction isolée sur la branche PUBLIQUE `feature/play-sync30-mesnotesdossiers-20261112` : `app/build.gradle` minSdk 24 (commit `8b6b051`). La version personnelle `com.chk.blocnote` n'est pas modifiée.
+- Contrôle bloquant ajouté à `.github/workflows/play-signed-aab.yml` : le manifeste d'un bundle signé doit déclarer minSdk >= 24, avant livraison (commit `557ebbe`).
+- Run signé de correction : https://github.com/Chasmet/Bloc-note/actions/runs/43588185140 . Ne valider SUCCESS qu'après lecture du statut final et de l'artefact.
+- Ne pas réimporter l'ancien AAB `Sync30_MesNotes.aab` / 50017 : invalidé par Google. Effacer seulement ses lignes d'erreur dans la console, sans toucher aux archives ou données de l'application personnelle.
+- La vérification de paiement CHK HTTPS renvoyait HTTP 503 au dernier contrôle ; **aucune vente ni publication avant `billingReady=true` et contrôle d'achat, restauration, annulation, remboursement.**
+- Prévol obligatoire : vérifier dans l'AAB réel package, minSdk >= 24, targetSdk conforme, versionCode supérieur, certificat d'upload, Google Play Billing, endpoint de vérification HTTPS vivant, et réponses des formulaires Console.
