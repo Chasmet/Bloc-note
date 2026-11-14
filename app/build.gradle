@@ -2,11 +2,7 @@ plugins {
     id 'com.android.application'
 }
 
-// URL publique HTTPS du verificateur CHK Paiements ; aucun secret dans l'APK.
-def chkPaymentsUrl = (providers.gradleProperty('chkPaymentsVerifyEndpoint').orNull ?: '').trim()
-if (chkPaymentsUrl && !(chkPaymentsUrl.startsWith('https://') && chkPaymentsUrl.endsWith('/api/v1/play/verify'))) {
-    throw new GradleException('CHK Paiements doit utiliser HTTPS et /api/v1/play/verify')
-}
+// Les achats premium utilisent directement Google Play Billing sans passerelle.
 
 android {
     namespace 'com.chk.blocnote'
@@ -20,7 +16,6 @@ android {
         versionCode = (providers.gradleProperty('versionCode').orNull ?: '2').toInteger()
         versionName = providers.gradleProperty('versionName').orNull ?: '2.0.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        buildConfigField 'String', 'CHK_PAYMENTS_VERIFY_ENDPOINT', '\"' + chkPaymentsUrl + '\"'
     }
 
     // Signature de debug stable utilisee par les builds GitHub Actions V2 et suivants.
