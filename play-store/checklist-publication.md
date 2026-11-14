@@ -319,3 +319,13 @@ Le simple clic « Save » avec bouton désactivé ne prouve PAS la sauvegarde di
 - **NON FAIT** : ne pas déclarer 50022 publiée / active tant que la piste Production n'indique pas `Active / Latest release 50022`. La précédente 50019 était active au début de cette intervention.
 - **À TESTER** : état actif et tarif local Google Play du produit unique `blocnote_premium_lifetime` (prix de référence 1,19 EUR), achat, annulation, remboursement et restauration sur plusieurs comptes ; confirmer au besoin la cohérence Data Safety. Le client Billing seul ne remplace pas une vérification serveur antifraude.
 - **AUCUN CHANGEMENT** de package/signature et pas de suppression des données de l'application personnelle `com.chk.blocnote`.
+
+
+## Statut final observé — 14 novembre 2026 14:19
+
+- **FAIT / VÉRIFIÉ DIRECTEMENT SUR PLAY CONSOLE** : piste Production `Active`, `Latest release: 50022 (2.6.22)`, 14 pays et régions, 0 installation affichée au moment de la lecture. Cela **remplace** le statut antérieur `Changes in review`.
+- AAB signé 50022 **conservé dans CHK** : `Sync30/GooglePlay/MesNotesDossiers/Production_50022/app-release.aab`, SHA-256 `9c61b6c7b1109c4b95296142183e7fe5f647a6188fd9ecec1dd9a39d2a361038`, run GitHub Actions commercial `43591257475` SUCCESS.
+- JKS **déjà créée et fonctionnelle**, ne jamais en recréer : `Sync30/Signatures/MesNotesDossiers/sync30_mesnotes_upload.jks`, SHA-256 JKS `0c224b9615e77a99f455072c1e98e2811c324c6cc1c853240859f0bd1e525c79`. Les quatre GitHub Secrets de signature sont fonctionnels ; JAMAIS exposer leur valeur.
+- Prochaine version **strictement supérieure à 50022**, sur la branche `feature/play-sync30-mesnotesdossiers-20261112`, `.github/workflows/play-signed-aab.yml` ; contrôles `minSdk>=24`, `targetSdk`, package et certificat d'upload déjà intégrés au workflow.
+- **RESTANT À TESTER** : produit à 1,19 € actif, achat réel/test, annulation, restauration et remboursement ; ne jamais assimiler installation ou début d'essai à une vente réussie.
+- NOTE CHK IMPORTANTE épinglée dans `Sécurité & sauvegardes > les applications play store > bloc note > sauvegarde de la ou on` : `00 — REPRISE OBLIGATOIRE MES NOTES : AAB SIGNÉ, JKS, GOOGLE PLAY, MISES À JOUR` (ID `5b202474-7d30-415b-8739-e4761e4493c8`). À lire au démarrage de toute nouvelle intervention, afin d'éviter de demander à l'éditeur un AAB/JKS déjà fournis.
