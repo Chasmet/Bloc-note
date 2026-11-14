@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId 'com.sync30.mesnotesdossiers'
         manifestPlaceholders = [appLabel: 'Mes Notes & Dossiers']
-        minSdk 23
+        minSdk 24
         targetSdk 36
         versionCode = (providers.gradleProperty('versionCode').orNull ?: '2').toInteger()
         versionName = providers.gradleProperty('versionName').orNull ?: '2.0.0'
