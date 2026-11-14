@@ -3,6 +3,8 @@ plugins {
 }
 
 // Les achats premium utilisent directement Google Play Billing sans passerelle.
+// Nouvelle release Play : regeneration obligatoire, car le versionCode 50023 a deja ete utilise.
+// Le workflow signe attribue un versionCode unique depuis le numero de run GitHub Actions.
 
 android {
     namespace 'com.chk.blocnote'
