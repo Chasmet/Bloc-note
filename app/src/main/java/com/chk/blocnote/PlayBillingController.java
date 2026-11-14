@@ -3,6 +3,7 @@ package com.chk.blocnote;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -13,43 +14,41 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
-import org.json.JSONObject;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import javax.net.ssl.HttpsURLConnection;
+
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Achat définitif Google Play, validé par le serveur partagé CHK Paiements.
- * Un résultat BillingClient PURCHASED n'est JAMAIS suffisant pour attribuer l'accès.
- * Sans endpoint HTTPS configuré / prêt, aucun parcours d'achat ne s'ouvre.
+ * Achat unique non consommable entièrement géré par Google Play Billing.
+ *
+ * Le client interroge Google Play au démarrage et après chaque achat afin de
+ * restaurer la licence sans dépendre d'un serveur CHK. Google Play traite les
+ * paiements, les états d'achat et leur acquittement.
+ *
+ * Limite : la validation côté appareil est moins robuste contre la fraude
+ * qu'une validation du purchaseToken par Google Play Developer API sur serveur.
+ * Aucun achat PENDING, annulé ou échoué ne donne accès au premium.
  */
 public final class PlayBillingController {
     public static final String PRODUCT_ID = "blocnote_premium_lifetime";
+
     public interface Listener {
         void onBillingStatus(String message, boolean purchaseEnabled, String formattedPrice);
         void onAccessRestored();
     }
+
     private final Activity activity;
     private final Listener listener;
     private final BillingClient billing;
     private final Handler main = new Handler(Looper.getMainLooper());
-    private final Set<String> verifying = Collections.synchronizedSet(new HashSet<>());
-    private final String endpoint = BuildConfig.CHK_PAYMENTS_VERIFY_ENDPOINT;
+    private boolean connected, closed, queryingPurchases;
     private ProductDetails product;
     private String price = "Prix communiqué par Google Play";
-    private boolean connected, verifierReady, checkingHealth, closed;
 
     public PlayBillingController(Activity activity, Listener listener) {
         this.activity = activity;
         this.listener = listener;
-        billing = BillingClient.newBuilder(activity.getApplicationContext())
+        this.billing = BillingClient.newBuilder(activity.getApplicationContext())
             .setListener(this::purchasesUpdated)
             .enablePendingPurchases(PendingPurchasesParams.newBuilder()
                 .enableOneTimeProducts().build())
@@ -58,13 +57,14 @@ public final class PlayBillingController {
     }
 
     private boolean ready() {
-        return !closed && connected && billing.isReady() && product != null && verifierReady;
+        return !closed && connected && billing.isReady() && product != null
+            && product.getOneTimePurchaseOfferDetailsList() != null
+            && !product.getOneTimePurchaseOfferDetailsList().isEmpty();
     }
 
     public void connect() {
         if (closed) return;
-        report("Connexion sécurisée à Google Play et CHK Paiements…");
-        checkVerifierHealth();
+        report("Connexion au paiement sécurisé Google Play…");
         if (billing.isReady()) {
             connected = true;
             queryOwned(false);
@@ -78,8 +78,12 @@ public final class PlayBillingController {
                     connected = true;
                     queryOwned(false);
                     queryProducts();
-                } else report("Google Play indisponible (" + result.getResponseCode() + ")");
+                } else {
+                    connected = false;
+                    report("Google Play indisponible (" + result.getResponseCode() + ").");
+                }
             }
+
             @Override public void onBillingServiceDisconnected() {
                 connected = false;
                 report("Connexion Google Play interrompue.");
@@ -87,127 +91,103 @@ public final class PlayBillingController {
         });
     }
 
-    private static JSONObject requestJson(URL url, JSONObject payload) throws Exception {
-        if (!"https".equalsIgnoreCase(url.getProtocol())) throw new SecurityException("HTTPS obligatoire");
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setConnectTimeout(6500);
-        connection.setReadTimeout(10000);
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("Accept", "application/json");
-        try {
-            if (payload != null) {
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                byte[] data = payload.toString().getBytes(StandardCharsets.UTF_8);
-                try (OutputStream stream = connection.getOutputStream()) { stream.write(data); }
-            }
-            int status = connection.getResponseCode();
-            if (status != 200 && !(status == 403 && payload != null))
-                throw new IllegalStateException("Réponse du serveur : " + status);
-            try (InputStream stream = status == 403
-                    ? connection.getErrorStream() : connection.getInputStream()) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                byte[] buffer = new byte[4096];
-                int n;
-                while ((n = stream.read(buffer)) != -1) {
-                    out.write(buffer, 0, n);
-                    if (out.size() > 16384) throw new IllegalStateException("Réponse trop volumineuse");
-                }
-                return new JSONObject(out.toString(StandardCharsets.UTF_8.name()));
-            }
-        } finally { connection.disconnect(); }
-    }
-
-    private boolean configured() {
-        return endpoint != null && endpoint.startsWith("https://")
-                && endpoint.endsWith("/api/v1/play/verify");
-    }
-
-    private void checkVerifierHealth() {
-        if (closed || checkingHealth) return;
-        if (!configured()) {
-            verifierReady = false;
-            report("Vérificateur CHK Paiements non configuré : vente désactivée.");
-            return;
-        }
-        checkingHealth = true;
-        new Thread(() -> {
-            boolean available = false;
-            try {
-                String base = endpoint.substring(0, endpoint.length() - "verify".length());
-                JSONObject response = requestJson(new URL(base + "health"), null);
-                available = response.optBoolean("billingReady", false)
-                    && response.optBoolean("ok", false);
-            } catch (Exception ignored) {}
-            final boolean value = available;
-            main.post(() -> {
-                if (closed) return;
-                verifierReady = value;
-                checkingHealth = false;
-                report(value ? "Vérification CHK Paiements disponible." :
-                    "CHK Paiements indisponible : aucun paiement ne sera lancé.");
-            });
-        }, "blocnote-chk-payments-health").start();
-    }
-
     private void queryProducts() {
-        if (closed || !connected) return;
+        if (closed || !billing.isReady()) return;
         QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
             .setProductList(Collections.singletonList(
-                QueryProductDetailsParams.Product.newBuilder().setProductId(PRODUCT_ID)
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(PRODUCT_ID)
                     .setProductType(BillingClient.ProductType.INAPP).build()))
             .build();
+
         billing.queryProductDetailsAsync(params, (result, details) -> {
             if (closed) return;
             product = null;
             if (result.getResponseCode() == BillingClient.BillingResponseCode.OK
                     && details.getProductDetailsList() != null) {
                 for (ProductDetails item : details.getProductDetailsList()) {
-                    if (PRODUCT_ID.equals(item.getProductId())) { product = item; break; }
+                    if (PRODUCT_ID.equals(item.getProductId())) {
+                        product = item;
+                        break;
+                    }
                 }
-                if (product != null && product.getOneTimePurchaseOfferDetailsList() != null
-                        && !product.getOneTimePurchaseOfferDetailsList().isEmpty()) {
-                    price = product.getOneTimePurchaseOfferDetailsList().get(0).getFormattedPrice();
-                    report(verifierReady ? "Achat unique disponible." :
-                            "Produit disponible ; vérification du serveur nécessaire.");
+                if (ready()) {
+                    price = product.getOneTimePurchaseOfferDetailsList()
+                        .get(0).getFormattedPrice();
+                    report("Achat définitif Google Play disponible.");
                     return;
                 }
             }
-            report("Produit Google Play non encore activé pour cette application.");
+            report("Produit d'achat unique non disponible sur Google Play.");
         });
     }
 
     public void restorePurchases() {
-        if (!billing.isReady()) { connect(); return; }
+        if (closed) return;
+        if (!billing.isReady()) {
+            connect();
+            return;
+        }
         queryOwned(true);
     }
 
+    private static boolean isValidOwnedPurchase(Purchase purchase) {
+        return purchase != null
+            && purchase.getProducts().contains(PRODUCT_ID)
+            && purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED
+            && purchase.getPurchaseToken() != null
+            && !purchase.getPurchaseToken().isEmpty();
+    }
+
     private void queryOwned(boolean manual) {
-        if (closed || !billing.isReady()) return;
+        if (closed || !billing.isReady() || queryingPurchases) return;
+        queryingPurchases = true;
         QueryPurchasesParams params = QueryPurchasesParams.newBuilder()
-                .setProductType(BillingClient.ProductType.INAPP).build();
+            .setProductType(BillingClient.ProductType.INAPP).build();
         billing.queryPurchasesAsync(params, (result, purchases) -> {
+            queryingPurchases = false;
             if (closed) return;
             if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                if (manual) report("Restauration impossible : vérifier la connexion Google Play.");
-                return; // Ne pas retirer une licence précédemment validée sur erreur réseau.
+                // Une erreur réseau ne signifie pas qu'un achat a été remboursé.
+                report("Impossible de vérifier les achats avec Google Play. Réessayez.");
+                return;
             }
-            boolean foundPurchased = false;
-            if (purchases != null) for (Purchase purchase : purchases) {
-                if (!purchase.getProducts().contains(PRODUCT_ID)) continue;
-                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-                    foundPurchased = true;
-                    verifyWithChkPayments(purchase);
-                } else if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
-                    report("Paiement en attente : accès non activé.");
+            boolean owned = false;
+            boolean pending = false;
+            if (purchases != null) {
+                for (Purchase purchase : purchases) {
+                    if (!purchase.getProducts().contains(PRODUCT_ID)) continue;
+                    if (isValidOwnedPurchase(purchase)) {
+                        owned = true;
+                        acknowledgeIfNecessary(purchase);
+                    } else if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+                        pending = true;
+                    }
                 }
             }
-            if (!foundPurchased) {
-                // Succès de queryPurchasesAsync : achat absent = licence révoquée ou jamais acquise.
-                TrialAccess.updatePurchase(activity, false);
-                report(manual ? "Aucun achat définitif trouvé sur ce compte Play." :
-                    "Statut des licences Google Play actualisé.");
+            boolean hadAccess = TrialAccess.purchased(activity);
+            // La réponse réussie de Google Play reflète les achats du compte actif.
+            TrialAccess.updatePurchase(activity, owned);
+            if (owned) {
+                report("Achat définitif Google Play reconnu.");
+                if (!hadAccess) listener.onAccessRestored();
+            } else if (pending) {
+                report("Achat Google Play en attente : accès non encore activé.");
+            } else {
+                report(manual ? "Aucun achat définitif sur ce compte Google Play."
+                    : "Aucune licence payante trouvée sur ce compte.");
+            }
+        });
+    }
+
+    private void acknowledgeIfNecessary(Purchase purchase) {
+        if (closed || !isValidOwnedPurchase(purchase) || purchase.isAcknowledged()) return;
+        AcknowledgePurchaseParams params = AcknowledgePurchaseParams.newBuilder()
+            .setPurchaseToken(purchase.getPurchaseToken()).build();
+        billing.acknowledgePurchase(params, result -> {
+            if (!closed && result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                // La restauration au prochain démarrage relancera l'acquittement.
+                report("Achat reconnu ; confirmation Google Play à réessayer.");
             }
         });
     }
@@ -215,115 +195,74 @@ public final class PlayBillingController {
     private void purchasesUpdated(BillingResult result, List<Purchase> purchases) {
         if (closed) return;
         if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
-            report("Achat annulé : aucun paiement effectué.");
+            report("Achat annulé : aucun paiement confirmé.");
             return;
         }
-        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK || purchases == null) {
-            report("Achat non confirmé par Google Play.");
+        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            report("Paiement non confirmé par Google Play.");
             return;
         }
-        for (Purchase purchase : purchases) {
-            if (!purchase.getProducts().contains(PRODUCT_ID)) continue;
-            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-                verifyWithChkPayments(purchase);
-            else if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING)
-                report("Paiement en attente : la licence n'est pas activée.");
-        }
-    }
-
-    private void verifyWithChkPayments(Purchase purchase) {
-        if (closed || purchase.getPurchaseState() != Purchase.PurchaseState.PURCHASED
-                || !purchase.getProducts().contains(PRODUCT_ID)
-                || purchase.getPurchaseToken() == null || purchase.getPurchaseToken().isEmpty())
-            return;
-        if (!configured()) {
-            report("Vérification CHK Paiements non configurée. Achat non débloqué.");
-            return;
-        }
-        final String token = purchase.getPurchaseToken();
-        if (!verifying.add(token)) return;
-        new Thread(() -> {
-            boolean verified = false;
-            boolean explicitlyRejected = false;
-            String error = "";
-            try {
-                JSONObject payload = new JSONObject();
-                payload.put("packageName", activity.getPackageName());
-                payload.put("productId", PRODUCT_ID);
-                payload.put("purchaseToken", token);
-                JSONObject response = requestJson(new URL(endpoint), payload);
-                if (!PRODUCT_ID.equals(response.optString("productId"))
-                        || !activity.getPackageName().equals(response.optString("packageName")))
-                    throw new IllegalStateException("Réponse serveur produit/application incompatible");
-                verified = response.optBoolean("verified", false);
-                explicitlyRejected = !verified; // Refus explicite de CHK, pas un simple problème réseau.
-            } catch (Exception ex) {
-                error = ex.getMessage() == null ? "réseau indisponible" : ex.getMessage();
-                // 403 d'une passerelle sans réponse structurée = réseau/autorisation,
-                // ne jamais révoquer une licence simplement sur une erreur HTTP.
+        boolean foundPurchased = false;
+        boolean foundPending = false;
+        if (purchases != null) {
+            for (Purchase purchase : purchases) {
+                if (!purchase.getProducts().contains(PRODUCT_ID)) continue;
+                if (isValidOwnedPurchase(purchase)) foundPurchased = true;
+                else if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING)
+                    foundPending = true;
             }
-            final boolean ok = verified;
-            final boolean revoked = explicitlyRejected;
-            final String fail = error;
-            main.post(() -> {
-                verifying.remove(token);
-                if (closed) return;
-                if (!ok) {
-                    if (revoked) TrialAccess.updatePurchase(activity, false);
-                    report("Achat non encore validé par CHK Paiements"
-                        + (fail.isEmpty() ? "." : " : " + fail));
-                    return;
-                }
-                // SEUL chemin d'attribution : après validation du token sur le serveur CHK.
-                TrialAccess.updatePurchase(activity, true);
-                report("Achat unique vérifié : accès définitif activé.");
-                listener.onAccessRestored();
-                if (!purchase.isAcknowledged()) {
-                    AcknowledgePurchaseParams params = AcknowledgePurchaseParams.newBuilder()
-                        .setPurchaseToken(token).build();
-                    billing.acknowledgePurchase(params, result -> {
-                        if (!closed && result.getResponseCode() != BillingClient.BillingResponseCode.OK)
-                            report("Licence validée ; confirmation Google Play à réessayer.");
-                    });
-                }
-            });
-        }, "blocnote-play-verify-chk").start();
+        }
+        if (foundPurchased) {
+            // Toujours réinterroger le catalogue des achats de Google Play avant
+            // d'attribuer le premium ; ne pas se contenter du callback d'achat.
+            queryOwned(true);
+        } else if (foundPending) {
+            report("Paiement en attente : aucun accès définitif pour le moment.");
+        } else {
+            report("Aucun achat définitif vérifié.");
+        }
     }
 
     public void buy() {
         if (closed) return;
         if (!ready()) {
-            report("Paiement bloqué : catalogue Google Play ou CHK Paiements indisponible.");
-            if (!connected) connect(); else checkVerifierHealth();
+            report("Paiement indisponible : vérifier Google Play et le produit.");
+            if (!connected) connect();
+            else queryProducts();
+            return;
+        }
+        if (TrialAccess.purchased(activity)) {
+            report("Licence définitive déjà acquise.");
             return;
         }
         List<ProductDetails.OneTimePurchaseOfferDetails> offers =
             product.getOneTimePurchaseOfferDetailsList();
-        if (offers == null || offers.isEmpty()) {
-            report("Aucune offre d'achat disponible.");
-            return;
-        }
-        BillingFlowParams.ProductDetailsParams.Builder p =
-            BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product);
+        BillingFlowParams.ProductDetailsParams.Builder item =
+            BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(product);
         String offerToken = offers.get(0).getOfferToken();
-        if (offerToken != null && !offerToken.isEmpty()) p.setOfferToken(offerToken);
+        if (offerToken != null && !offerToken.isEmpty()) {
+            item.setOfferToken(offerToken);
+        }
         BillingResult result = billing.launchBillingFlow(activity,
-            BillingFlowParams.newBuilder().setProductDetailsParamsList(
-                Collections.singletonList(p.build())).build());
-        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
-            report("Google Play ne peut pas ouvrir la fenêtre de paiement.");
+            BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(Collections.singletonList(item.build()))
+                .build());
+        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            report("Impossible d'ouvrir la fenêtre Google Play.");
+        }
     }
 
     private void report(String message) {
         main.post(() -> {
-            if (!closed && !activity.isFinishing() && !activity.isDestroyed())
+            if (!closed && !activity.isFinishing() && !activity.isDestroyed()) {
                 listener.onBillingStatus(message, ready(), price);
+            }
         });
     }
 
     public void close() {
         closed = true;
-        verifying.clear();
         billing.endConnection();
     }
 }
