@@ -1,3 +1,16 @@
+## REPRISE VÉRIFIÉE — 14 NOVEMBRE 2026 (GOOGLE PLAY & PAIEMENTS)
+
+- [x] **Google Play Console : 8/11 tâches validées**, relu sur tableau de bord. Les 3 tâches encore ouvertes : Data safety, « Select an app category and provide contact details », « Set up your store listing ». La piste interne est bloquée tant que les tâches initiales ne sont pas terminées.
+- [ ] **Contacts fiche Play** : formulaire Store settings rempli avec l'e-mail professionnel et le site Sync 30 ; clic Save lancé, puis dialogue bloqué avec boutons désactivés. **Aucune preuve de persistance**, ne pas considérer la tâche terminée.
+- [ ] **Data safety** : les réponses de base ont été saisies à nouveau puis « Save draft » est resté sur « Submitting... » dans CHK en arrière-plan. Aucune confirmation d'enregistrement ni soumission. Les données d'achat transmises au serveur et hachées ensuite sont des données collectées et non éphémères ; voir la politique Play et vérifier toutes les finalités et SDKs avant validation.
+- [x] **AAB QA signé récupéré et vérifié** depuis GitHub Actions [43485466361](https://github.com/Chasmet/Bloc-note/actions/runs/43485466361), artifact `14067965145` (ZIP SHA-256 `4004ce8d5e803f9f76a7f570e6cdf18a3a1273fd62720131109c9b451b5457d5`). AAB extrait SHA-256 `c70a34e36b0d481d5a18ce9733c072c9322f56a15079d62ccdf32b0944feedd8`. Vérification indépendante `jarsigner -verify` → `jar verified.`, certificat upload SHA256 `95:4C:04:AC:6F:3A:66:66:E0:69:1B:17:95:CB:15:6C:D9:7C:9D:F9:2F:B0:0A:AD:29:AC:0B:AE:1F:02:2C:EB`. Manifest : package `com.sync30.mesnotesdossiers`, versionCode **34006**, versionName **2.5.6**. Copie ZIP et AAB extraite dans stockage privé CHK Android, `Sync30/GooglePlay/MesNotesDossiers/`. **Achats désactivés**, ne pas publier en production.
+- [x] **Backend CHK Paiements / branche `feature/paiements-sync30-public-20261112`** : script Funnel PowerShell réparé (port public 10000 uniquement), workflow CI Windows désormais actif sur cette branche. Corrigé aussi `PaymentsHub.recordVerifiedGooglePlayPurchase` qui refusait le package public même après validation Google. Tests régression achat, enregistrement SHA-256, annulation/remboursement ajoutés. GitHub Actions SUCCESS [43571399030](https://github.com/Chasmet/CHK-serveur-Universal-Control/actions/runs/43571399030) : parser PowerShell + tests serveur.
+- [ ] **Backend Windows NON déployé / Google Play Developer API/OAuth non validée / Funnel HTTPS public NON activé**. Aucun paiement réel ni test installé via piste Play. Ne pas activer vente.
+- [x] **Politique de confidentialité** vérifiée en lecture sur Render : décrit jeton d'achat, SHA-256, Google Play API, sauvegardes Android et notes locales. À compléter avant publication : durée/conservation de l'historique de paiement et procédure de suppression appropriée.
+- [ ] **Statut trader / Organisation, dossier complet et dernières captures** à vérifier puis envoi pour examen uniquement après l'ensemble des tests.
+
+---
+
 ## REPRISE PLAY CONSOLE — PUBLIC CIBLE VALIDÉ, 13/11/2026
 
 - [x] **Classification du contenu IARC** : statut **Completed**, soumis le 13 novembre 2026 à 22 h 51, vérifié directement dans Play Console.
