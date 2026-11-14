@@ -7,6 +7,12 @@
 - **Confidentialité** : la [politique publique](https://sync30.onrender.com/politique-confidentialite-blocnote.html) précise la conservation de l’historique et la procédure de demande d’effacement. Déploiement statique Render `dep-dbs2dduk1f9s7383de7g` **live**, texte relu sur l’URL publique. Dans Data safety, l’étape 2 a été renseignée avec collecte, HTTPS, absence de compte et URL de demande d’effacement. Google Play reste sur « Checking URLs… ». L’enregistrement du brouillon n’est pas confirmé. Les types et usages des données restent à finaliser.
 - **À reprendre** : ouvrir CHK Agent Browser au premier plan pour terminer la fiche, les contacts et Data safety, puis vérifier le statut commerçant et le produit. Sur Windows, exécuter la mise en service des correctifs dans le service CHK Paiements existant, avec ses données et le compte de service Google. Vérifier `billingReady=true` en HTTPS, renseigner le secret et relancer le workflow. Offre gratuite à télécharger, essai 24 h, achat non consommable de 1,19 €, anciennes notes lisibles et exportables. Dépôt direct en production après contrôle du bundle.
 
+### Reprise après ouverture du navigateur CHK
+
+- Data safety a passé le contrôle d’URL. « Purchase history » a été coché et la page est passée à l’étape 4/5. La section « Data usage and handling » est restée sans intitulé ni bouton Start et Next était désactivé. Aucune sauvegarde finale confirmée.
+- Dans la fiche, les textes FR, les deux visuels principaux et quatre captures étaient toujours présents. Le clic Save dans Review a désactivé le bouton, mais la tâche reste ouverte sur le tableau de bord rechargé. Les coordonnées restent également à enregistrer.
+- Nouvelle lecture du tableau de bord : 8/11. Le canal Local 3 a déclaré le WebView en arrière-plan malgré l’ouverture signalée sur le téléphone. Le contrôle HTTPS du backend a renvoyé HTTP 503 depuis l’environnement de vérification.
+
 ---
 
 ## TENTATIVE DE SOUMISSION DIRECTE — 14/11/2026
