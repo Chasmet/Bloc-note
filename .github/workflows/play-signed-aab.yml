@@ -1,6 +1,12 @@
-name: Play — AAB release signe (artefact de test interne uniquement)
+name: Play — AAB commercial signé
 on:
   workflow_dispatch:
+    inputs:
+      play_version_floor:
+        description: Plus grand versionCode déjà importé dans Play Console (0 si aucun)
+        required: true
+        type: number
+        default: 0
   push:
     branches:
       - feature/play-sync30-mesnotesdossiers-20261112
@@ -11,6 +17,7 @@ permissions:
   contents: read
 jobs:
   release-bundle:
+    if: github.ref == 'refs/heads/feature/play-sync30-mesnotesdossiers-20261112'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -57,14 +64,14 @@ jobs:
             exit 1
           fi
           echo "Certificat d'upload conforme a la fiche Sync 30." >> "$GITHUB_STEP_SUMMARY"
-      - name: Verifier la preparation du serveur CHK Paiements (information uniquement)
+      - name: Vérifier la disponibilité de CHK Paiements
         shell: bash
         env:
           CHK_PAYMENTS_VERIFY_ENDPOINT: ${{ secrets.BLOCNOTE_CHK_PAYMENTS_VERIFY_URL }}
         run: |
           if [ -z "$CHK_PAYMENTS_VERIFY_ENDPOINT" ]; then
-            echo "AVERTISSEMENT : URL CHK Paiements absente. AAB SIGNE pour tests techniques SEULEMENT ; Billing non utilisable. Aucune soumission production." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo "::error::BLOCNOTE_CHK_PAYMENTS_VERIFY_URL manquant. Aucun AAB commercial généré."
+            exit 1
           fi
           case "$CHK_PAYMENTS_VERIFY_ENDPOINT" in
             https://*/api/v1/play/verify) ;;
@@ -86,7 +93,20 @@ jobs:
               raise SystemExit("CHK Paiements non pret. Aucun AAB signe avec endpoint invalide.")
           print("CHK Paiements endpoint verifie au moment de la compilation.")
           PY
-      - name: Compiler bundle release signe pour controle interne
+      - name: Calculer la version de production
+        id: version
+        shell: bash
+        env:
+          PLAY_VERSION_FLOOR: ${{ inputs.play_version_floor || 0 }}
+        run: |
+          VERSION_CODE=$((50000 + GITHUB_RUN_NUMBER))
+          if [[ ! "$PLAY_VERSION_FLOOR" =~ ^[0-9]+$ ]] || (( VERSION_CODE <= 10#$PLAY_VERSION_FLOOR || VERSION_CODE > 2100000000 )); then
+            echo "::error::versionCode commercial invalide ou déjà dépassé dans Play Console."
+            exit 1
+          fi
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "name=2.6.$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+      - name: Compiler le bundle commercial signé
         shell: bash
         env:
           ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/blocnote-upload.jks
@@ -94,12 +114,14 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.BLOCNOTE_UPLOAD_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.BLOCNOTE_UPLOAD_KEY_PASSWORD }}
           CHK_PAYMENTS_VERIFY_ENDPOINT: ${{ secrets.BLOCNOTE_CHK_PAYMENTS_VERIFY_URL }}
+          PLAY_VERSION_CODE: ${{ steps.version.outputs.code }}
+          PLAY_VERSION_NAME: ${{ steps.version.outputs.name }}
         run: |
           gradle wrapper --gradle-version 8.13
           chmod +x gradlew
           ./gradlew :app:bundleRelease --stacktrace \
-            -PversionCode=$((24000 + GITHUB_RUN_NUMBER)) \
-            -PversionName="2.4.$GITHUB_RUN_NUMBER" \
+            -PversionCode="$PLAY_VERSION_CODE" \
+            -PversionName="$PLAY_VERSION_NAME" \
             -PchkPaymentsVerifyEndpoint="$CHK_PAYMENTS_VERIFY_ENDPOINT"
           AAB=app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
@@ -110,12 +132,42 @@ jobs:
             echo "::error::Certificat du bundle different de celui de la cle d'upload."
             exit 1
           fi
-          echo "AAB release SIGNE. Destine aux tests techniques/internes uniquement, jamais a la production automatique." >> "$GITHUB_STEP_SUMMARY"
-          echo "Ne pas publier ni activer de ventes avant achat, remboursement et verificateur CHK testes." >> "$GITHUB_STEP_SUMMARY"
-      - name: AAB signe — artefact reserve au depot
+      - name: Inspecter le manifeste et l’intégrité du bundle
+        shell: bash
+        env:
+          PLAY_VERSION_CODE: ${{ steps.version.outputs.code }}
+          PLAY_VERSION_NAME: ${{ steps.version.outputs.name }}
+        run: |
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          curl --fail --silent --show-error --location --retry 3 \
+            'https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar' \
+            -o "$RUNNER_TEMP/bundletool.jar"
+          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle="$AAB"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$AAB" > "$RUNNER_TEMP/play-release-manifest.xml"
+          python3 - "$RUNNER_TEMP/play-release-manifest.xml" <<'PY'
+          import os
+          import sys
+          import xml.etree.ElementTree as ET
+
+          manifest = ET.parse(sys.argv[1]).getroot()
+          android = '{http://schemas.android.com/apk/res/android}'
+          assert manifest.attrib['package'] == 'com.sync30.mesnotesdossiers'
+          assert manifest.attrib[android + 'versionCode'] == os.environ['PLAY_VERSION_CODE']
+          assert manifest.attrib[android + 'versionName'] == os.environ['PLAY_VERSION_NAME']
+          assert manifest.find('uses-sdk').attrib[android + 'targetSdkVersion'] == '36'
+          permissions = {item.attrib[android + 'name'] for item in manifest.findall('uses-permission')}
+          allowed = {'android.permission.INTERNET', 'com.android.vending.BILLING',
+                     'android.permission.ACCESS_NETWORK_STATE'}
+          assert {'android.permission.INTERNET', 'com.android.vending.BILLING'} <= permissions <= allowed, permissions
+          billing = manifest.find("application/meta-data[@" + android + "name='com.google.android.play.billingclient.version']")
+          assert billing is not None and billing.attrib[android + 'value'].startswith('9.'), 'Version Play Billing absente ou inattendue'
+          print('Package, SDK, versions, permissions et bibliothèque Play Billing vérifiés.')
+          PY
+          sha256sum "$AAB" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: AAB commercial signé — artefact réservé au dépôt
         uses: actions/upload-artifact@v4
         with:
-          name: blocnote-signed-aab-INTERNAL
+          name: mesnotesdossiers-production-v${{ steps.version.outputs.code }}
           path: app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
